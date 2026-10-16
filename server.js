@@ -7,6 +7,10 @@ const PORT = 3000;
 const ARCHIVO = path.join(__dirname, "data", "productos.json");
 
 app.use(express.json());
+// Index en la raiz para despliegue comodo en Azure VM (debe ir antes del static)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 app.use(express.static(path.join(__dirname, "public")));
 
 function leerProductos() {
