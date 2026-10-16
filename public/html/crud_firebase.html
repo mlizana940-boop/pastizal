@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CRUD Firebase</title><link rel="stylesheet" href="../css/estilos.css"></head>
+<body>
+<header><h1>CRUD · Firebase Firestore</h1><p>CRUD directamente sobre una colección cloud.</p></header>
+
+<nav>
+  <a href="../index.html">Inicio</a>
+  <a href="crud_localstorage.html">LocalStorage</a>
+  <a href="crud_json.html">JSON + Node</a>
+  <a href="crud_sheets.html">Google Sheets</a>
+  <a href="crud_firebase.html">Firebase</a>
+</nav>
+
+<main>
+<div class="card">
+<h2 id="tituloForm">Agregar producto</h2>
+<div class="form-grid">
+<div><small>Nombre</small><input id="nombre"></div>
+<div><small>Precio</small><input id="precio" type="number" min="0"></div>
+<div><small>Stock</small><input id="stock" type="number" min="0"></div>
+<button id="btnGuardar">Agregar</button>
+</div><br><button id="btnCancelar" class="secondary">Cancelar edición</button>
+</div>
+<div class="card"><p id="estado" class="status">Conectando...</p>
+<table><thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead><tbody id="tabla"></tbody></table></div>
+<div class="card"><h2>Configuración</h2>
+<p>Busca <code>firebaseConfig</code> en este archivo y reemplaza los valores. La colección usada se llama <code>productos</code>.</p>
+<p class="muted">Para producción debes usar Authentication y reglas de seguridad restrictivas; las reglas abiertas solo sirven para un laboratorio controlado.</p>
+</div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {
+ getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+const firebaseConfig = {
+ apiKey: "REEMPLAZAR",
+ authDomain: "REEMPLAZAR.firebaseapp.com",
+ projectId: "REEMPLAZAR",
+ storageBucket: "REEMPLAZAR.firebasestorage.app",
+ messagingSenderId: "REEMPLAZAR",
+ appId: "REEMPLAZAR"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const col=collection(db,"productos");
+let editando=null;
+
+const nombre=document.getElementById("nombre");
+const precio=document.getElementById("precio");
+const stock=document.getElementById("stock");
+const tabla=document.getElementById("tabla");
+const estado=document.getElementById("estado");
+const tituloForm=document.getElementById("tituloForm");
+const btnGuardar=document.getElementById("btnGuardar");
+
+async function listar(){
+ try{
+   const snap=await getDocs(col);
+   const productos=snap.docs.map(d=>({id:d.id,...d.data()}));
+   tabla.innerHTML=productos.map(p=>`
+    <tr><td>${p.nombre ?? ""}</td><td>$${Number(p.precio ?? 0).toLocaleString("es-CL")}</td><td>${p.stock ?? 0}</td>
+    <td class="actions">
+      <button class="edit" data-edit="${p.id}">Editar</button>
+      <button class="danger" data-delete="${p.id}">Eliminar</button>
+    </td></tr>`).join("");
+   estado.textContent=`Firestore: ${productos.length} producto(s).`;
+
+   tabla.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editar(productos.find(p=>p.id===b.dataset.edit)));
+   tabla.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>eliminar(b.dataset.delete));
+ }catch(e){ estado.textContent="Firebase: "+e.message; }
+}
+async function guardar(){
+ const p={nombre:nombre.value.trim(),precio:Number(precio.value),stock:Number(stock.value)};
+ if(!p.nombre) return alert("Ingresa nombre.");
+ try{
+   if(editando===null) await addDoc(col,p);
+   else await updateDoc(doc(db,"productos",editando),p);
+   cancelar(); await listar();
+ }catch(e){alert(e.message)}
+}
+function editar(p){
+ editando=p.id; nombre.value=p.nombre; precio.value=p.precio; stock.value=p.stock;
+ tituloForm.textContent="Editar producto"; btnGuardar.textContent="Actualizar";
+}
+async function eliminar(id){
+ if(!confirm("¿Eliminar producto?")) return;
+ await deleteDoc(doc(db,"productos",id));
+ await listar();
+}
+function cancelar(){
+ editando=null; nombre.value=""; precio.value=""; stock.value="";
+ tituloForm.textContent="Agregar producto"; btnGuardar.textContent="Agregar";
+}
+btnGuardar.onclick=guardar;
+document.getElementById("btnCancelar").onclick=cancelar;
+
+if(firebaseConfig.projectId==="REEMPLAZAR") estado.textContent="Primero configura firebaseConfig.";
+else listar();
+</script>
+</body></html>

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "nombre": "Notebook Lenovo",
+    "precio": 599990,
+    "stock": 8
+  },
+  {
+    "id": 2,
+    "nombre": "Mouse inalámbrico",
+    "precio": 12990,
+    "stock": 25
+  },
+  {
+    "id": 3,
+    "nombre": "Monitor 24 pulgadas",
+    "precio": 129990,
+    "stock": 6
+  },
+  {
+    "id": 1788354804932,
+    "nombre": "Teclado inalambrico",
+    "precio": 7990,
+    "stock": 45
+  },
+  {
+    "id": 1788356206815,
+    "nombre": "Pantalla 24\"",
+    "precio": 100000,
+    "stock": 50
+  }
+]
