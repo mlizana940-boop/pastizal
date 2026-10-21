@@ -1,6 +1,6 @@
 # Reservas de cabañas en Chiloé
 
-MVP web para consultar cabañas, solicitar reservas y administrar cabañas y solicitudes.
+Aplicación web de reservas de cabañas en Chiloé. Los clientes pueden consultar cabañas y solicitar reservas; el personal administrador puede gestionar cabañas y solicitudes desde un panel privado.
 
 ## Arquitectura
 
