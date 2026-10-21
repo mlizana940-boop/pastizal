@@ -8,3 +8,7 @@ service-account*.json
 firebase-adminsdk*.json
 *service-account*.json
 *firebase-adminsdk*.json
+pastizal-admin.json
+*-admin.json
+admin.json
+admin-*.json
