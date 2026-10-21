@@ -1,201 +1,101 @@
-# CLOUD STOCK CRUD — Guía docente
+# Reservas de cabañas en Chiloé
 
-## Qué significa CRUD
-- C = Create = Crear
-- R = Read = Leer / listar
-- U = Update = Actualizar
-- D = Delete = Eliminar
+MVP web para consultar cabañas, solicitar reservas y administrar cabañas y solicitudes.
 
-El objetivo es usar la MISMA interfaz de productos y cambiar únicamente dónde viven los datos.
+## Arquitectura
 
----
+La arquitectura principal es **cliente-servidor**:
 
-# 1. Preparación en Visual Studio Code
+```text
+Navegador (HTML/CSS/JS) ⇄ API Node.js + Express ⇄ Cloud Firestore
+Administrador ⇄ Firebase Authentication → token verificado por la API
+```
 
-## Requisito
-Instalar Node.js.
+El navegador no escribe en Firestore. La API recibe las solicitudes, valida los datos y aplica las reglas de negocio antes de usar Firebase Admin SDK. Las carpetas `controllers`, `services`, `models` y `repositories` ordenan el código del servidor; no representan una arquitectura MVC que el equipo deba presentar.
 
-Abrir esta carpeta con Visual Studio Code.
+## Estructura
 
-Abrir Terminal > New Terminal y ejecutar:
+```text
+src/
+  app.js
+  server.js
+  config/firebaseAdmin.js
+  routes/
+  controllers/
+  services/
+  models/
+  repositories/
+  middleware/
+  utils/
+public/
+  admin/
+  cliente/
+  css/
+```
 
-    npm install
+La vista de clientes queda como espacio de trabajo para quien la implementará. El inicio incluye el acceso al panel administrativo.
 
-Después:
+## Requisitos locales
 
-    npm start
+- Node.js 22 o superior.
+- Un proyecto de Firebase con Cloud Firestore y Authentication.
+- Una cuenta de servicio de Firebase para la API. No guardes ese archivo en el repositorio.
 
-Abrir:
+Instala dependencias y copia `.env.example` a `.env`:
 
-    http://localhost:3000
+```powershell
+npm install
+Copy-Item .env.example .env
+```
 
-IMPORTANTE:
-Para esta versión conviene usar Node/Express para todo el proyecto.
-No necesitas Live Server.
+Completa `FIREBASE_PROJECT_ID` y configura credenciales de servidor. En desarrollo puedes usar `GOOGLE_APPLICATION_CREDENTIALS` apuntando a un archivo de cuenta de servicio guardado fuera del repositorio, o definir `FIREBASE_SERVICE_ACCOUNT_JSON` en `.env`. En el servicio Azure, configura la credencial como variable de entorno protegida del servicio.
 
----
+En Firebase Authentication habilita el proveedor de correo y contraseña y crea la cuenta de administración. Copia su UID en `FIREBASE_ADMIN_UIDS`; para varios administradores, separa los UID con comas. Configura también la aplicación web en `public/admin/firebase-config.js`. Ese archivo solo contiene la configuración cliente de Firebase; nunca pongas allí la clave privada de la cuenta de servicio.
 
-# 2. CRUD LocalStorage
+Inicia la aplicación:
 
-Archivo:
-public/html/crud_localstorage.html
+```powershell
+npm run dev
+```
 
-No necesita configuración.
+Abre `http://localhost:3000`. La API responde en el mismo origen; `GET /api/health` sirve como comprobación básica del servidor.
 
-Métodos importantes:
-- CREATE: array.push() + localStorage.setItem()
-- READ: localStorage.getItem()
-- UPDATE: findIndex() + reemplazo
-- DELETE: filter()
+## Datos en Firestore
 
-Experimento:
-1. Agregar producto.
-2. Recargar.
-3. Sigue existiendo.
-4. Abrir otro navegador.
-5. Los datos no aparecen.
+- `cabanas`: nombre, descripción, precio por noche, capacidad, comodidades y estado.
+- `reservas`: cabaña, datos de contacto del cliente, fechas, huéspedes, total estimado y estado.
+- `cabanas/{cabanaId}/nochesOcupadas/{AAAA-MM-DD}`: bloqueo de cada noche de una reserva pendiente o confirmada.
 
-Conclusión:
-Los datos están en el navegador, no en una nube compartida.
+La solicitud valida fechas, contacto, capacidad y disponibilidad. Las noches se bloquean junto con la reserva en una transacción. Las reservas pendientes bloquean fechas hasta que administración las confirme, rechace o cancele. Una cabaña se desactiva de forma lógica para conservar el historial.
 
----
+El archivo `firestore.rules` deniega acceso directo desde clientes web. La API usa Firebase Admin SDK, que opera con credenciales de servidor; por eso la autorización de administrador se verifica en Express. Puedes desplegar las reglas con Firebase CLI después de seleccionar el proyecto correspondiente:
 
-# 3. CRUD JSON + Node.js
+```powershell
+firebase deploy --only firestore:rules
+```
 
-Archivos:
-- public/html/crud_json.html
-- server.js
-- data/productos.json
+## API
 
-El navegador NO puede sobrescribir directamente productos.json.
-Por eso Node.js crea una API.
+### Rutas públicas
 
-Rutas:
-GET    /api/productos        READ
-POST   /api/productos        CREATE
-PUT    /api/productos/:id    UPDATE
-DELETE /api/productos/:id    DELETE
+- `GET /api/cabanas`: lista cabañas activas; acepta `fechaEntrada`, `fechaSalida` y `huespedes` para filtrar por disponibilidad y capacidad.
+- `POST /api/reservas`: registra una solicitud pendiente y valida disponibilidad.
 
-Experimento:
-Agregar un producto desde el navegador y después abrir:
-data/productos.json
+### Rutas de administrador
 
-Verás que el archivo realmente cambió.
+Todas requieren un Firebase ID token en `Authorization: Bearer <token>` y un UID incluido en `FIREBASE_ADMIN_UIDS`.
 
-Arquitectura:
-HTML -> fetch() -> Express -> productos.json
+- `GET /api/admin/cabanas`
+- `POST /api/admin/cabanas`
+- `PUT /api/admin/cabanas/:id`
+- `DELETE /api/admin/cabanas/:id`: desactiva la cabaña.
+- `GET /api/admin/reservas?estado=pendiente`
+- `PATCH /api/admin/reservas/:id/estado` con `estado`: `confirmada`, `rechazada` o `cancelada`.
 
----
+Los estados permitidos son `pendiente`, `confirmada`, `rechazada` y `cancelada`. Rechazar o cancelar libera las noches; una reserva confirmada también puede cancelarse.
 
-# 4. CRUD Google Sheets
+## Seguridad
 
-## Crear la hoja
-Crear un Google Sheet.
-
-Renombrar la pestaña:
-Productos
-
-Fila 1:
-id | nombre | precio | stock
-
-Ejemplo:
-1 | Notebook | 599990 | 8
-
-## Apps Script
-En Google Sheets:
-Extensiones > Apps Script
-
-Copiar el contenido de:
-apps_script/Code.gs
-
-Guardar.
-
-Luego:
-Implementar > Nueva implementación > Aplicación web
-
-Ejecutar como:
-Yo
-
-Acceso:
-Para una clase de laboratorio, configura un acceso que permita que los estudiantes puedan usar la URL según las políticas de tu cuenta/institución.
-
-Copiar la URL terminada en:
-/exec
-
-Pegar esa URL en:
-crud_sheets.html
-
-La página la guarda en LocalStorage para no tener que pegarla en cada recarga.
-
-Arquitectura:
-HTML -> fetch() -> Apps Script -> Google Sheets
-
----
-
-# 5. CRUD Firebase Firestore
-
-Archivo:
-public/html/crud_firebase.html
-
-## Firebase
-1. Entrar a Firebase Console.
-2. Crear proyecto.
-3. Crear una aplicación Web.
-4. Crear Firestore Database.
-5. Copiar firebaseConfig.
-6. Reemplazar los valores REEMPLAZAR en crud_firebase.html.
-
-Colección:
-productos
-
-Campos:
-nombre  string
-precio  number
-stock   number
-
-La página puede crear la colección automáticamente al agregar el primer documento.
-
-Funciones usadas:
-CREATE -> addDoc()
-READ   -> getDocs()
-UPDATE -> updateDoc()
-DELETE -> deleteDoc()
-
-IMPORTANTE:
-No dejes Firestore abierto públicamente en una aplicación real.
-Para enseñanza puedes usar reglas temporales controladas y luego enseñar Authentication + Security Rules.
-
----
-
-# Comparación final
-
-LocalStorage
-HTML/JS -> navegador
-
-JSON
-HTML/JS -> API Node -> archivo JSON
-
-Google Sheets
-HTML/JS -> Internet -> Apps Script -> Sheet
-
-Firebase
-HTML/JS -> Internet -> Cloud Firestore
-
----
-
-# Actividad sugerida
-
-Cada estudiante debe:
-1. Crear "Teclado mecánico", precio 39990, stock 10.
-2. Listarlo.
-3. Cambiar stock de 10 a 7.
-4. Eliminarlo.
-5. Repetir el proceso en las cuatro tecnologías.
-
-Luego responder:
-
-1. ¿Dónde vive el dato?
-2. ¿Necesita Internet?
-3. ¿Puede otro computador ver el mismo dato?
-4. ¿Qué componente hace de backend?
-5. ¿Cuál opción sería más apropiada para una aplicación multiusuario?
+- No subas `.env`, cuentas de servicio, contraseñas ni tokens.
+- La API devuelve un error genérico ante fallos internos y mantiene los datos privados de clientes detrás de autenticación administrativa.
+- Las reglas de Firestore no sustituyen la autorización de Express cuando se usa Firebase Admin SDK.

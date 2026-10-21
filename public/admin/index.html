@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administración · Cabañas Chiloé</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Cabañas Chiloé</p>
+      <h1>Administración</h1>
+    </div>
+    <div class="header-actions">
+      <span id="admin-email" class="muted"></span>
+      <button id="logout-button" class="button button-secondary" type="button">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <p id="page-message" class="notice" role="status" aria-live="polite"></p>
+    <section class="summary-grid" aria-label="Resumen">
+      <article class="summary-card"><span>Cabañas activas</span><strong id="active-count">—</strong></article>
+      <article class="summary-card"><span>Reservas pendientes</span><strong id="pending-count">—</strong></article>
+      <article class="summary-card"><span>Reservas registradas</span><strong id="reservation-count">—</strong></article>
+    </section>
+
+    <section class="panel" aria-labelledby="cabins-title">
+      <div class="panel-heading">
+        <div><p class="eyebrow">Alojamiento</p><h2 id="cabins-title">Cabañas</h2></div>
+      </div>
+      <form id="cabin-form" class="cabin-form">
+        <input id="cabin-id" type="hidden">
+        <label>Nombre<input id="cabin-name" name="nombre" maxlength="100" required></label>
+        <label>Precio por noche (CLP)<input id="cabin-price" name="precioPorNoche" type="number" min="1" step="1" required></label>
+        <label>Capacidad<input id="cabin-capacity" name="capacidad" type="number" min="1" max="30" step="1" required></label>
+        <label class="wide-field">Descripción<textarea id="cabin-description" name="descripcion" maxlength="1000" rows="3"></textarea></label>
+        <label>URL de imagen<input id="cabin-image" name="imagenUrl" type="url" placeholder="https://…"></label>
+        <label>Comodidades<input id="cabin-amenities" name="comodidades" placeholder="Wi-Fi, tinaja, estacionamiento"></label>
+        <div class="form-actions wide-field">
+          <button id="save-cabin" class="button" type="submit">Guardar cabaña</button>
+          <button id="cancel-edit" class="button button-secondary" type="button" hidden>Cancelar edición</button>
+        </div>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cabaña</th><th>Precio/noche</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="cabins-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="reservations-title">
+      <div class="panel-heading panel-heading-wrap">
+        <div><p class="eyebrow">Solicitudes</p><h2 id="reservations-title">Reservas</h2></div>
+        <label class="filter-label">Filtrar estado
+          <select id="reservation-filter">
+            <option value="">Todas</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="confirmada">Confirmadas</option>
+            <option value="rechazada">Rechazadas</option>
+            <option value="cancelada">Canceladas</option>
+          </select>
+        </label>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cliente</th><th>Cabaña</th><th>Fechas</th><th>Huéspedes</th><th>Total estimado</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody id="reservations-table"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/admin/admin.js"></script>
+</body>
+</html>
