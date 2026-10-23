@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  signOut,
   signInWithEmailAndPassword,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
@@ -18,6 +19,11 @@ const passwordInput = document.querySelector("#account-password");
 const passwordHint = document.querySelector("#password-hint");
 const loginModeButton = document.querySelector("#login-mode");
 const registerModeButton = document.querySelector("#register-mode");
+const accountMode = document.querySelector("#account-mode");
+const signedInView = document.querySelector("#signed-in-view");
+const accountUserEmail = document.querySelector("#account-user-email");
+const logoutButton = document.querySelector("#account-logout");
+const accountDescription = document.querySelector("#account-description");
 const params = new URLSearchParams(window.location.search);
 const requestedNext = params.get("next");
 
@@ -62,6 +68,25 @@ function setMode(register) {
   loginModeButton.setAttribute("aria-pressed", String(!register));
   registerModeButton.setAttribute("aria-pressed", String(register));
   showMessage("");
+}
+
+function showAccountState(user) {
+  const isSignedIn = Boolean(user);
+  accountMode.hidden = isSignedIn;
+  form.hidden = isSignedIn;
+  signedInView.hidden = !isSignedIn;
+
+  if (isSignedIn) {
+    document.querySelector("#account-heading").textContent = "Mi cuenta";
+    accountDescription.textContent = "Tu sesión está activa. Desde aquí puedes volver a explorar las cabañas o cerrar sesión.";
+    accountUserEmail.textContent = user.email || "Cuenta de usuario";
+    return;
+  }
+
+  accountDescription.textContent = isRegisterMode
+    ? "Regístrate para solicitar una reserva. También puedes usar esta cuenta para iniciar sesión."
+    : "Ingresa a tu cuenta para solicitar una reserva o acceder al panel si eres administrador.";
+  document.querySelector("#account-heading").textContent = isRegisterMode ? "Crea tu cuenta" : "Inicia sesión";
 }
 
 async function continueAfterAuthentication(user) {
@@ -114,9 +139,24 @@ if (!firebaseConfigReady) {
   const auth = getAuth(initializeApp(firebaseConfig));
 
   onAuthStateChanged(auth, (user) => {
-    if (user && !authFlowInProgress && requestedNext && lastCheckedUserUid !== user.uid) {
+    if (!authFlowInProgress) showAccountState(user);
+
+    // Keep a signed-in customer on Mi Cuenta. Only the admin entry point
+    // should automatically continue from an existing session.
+    if (user && !authFlowInProgress && isAdminDestination && lastCheckedUserUid !== user.uid) {
       lastCheckedUserUid = user.uid;
       void continueAfterAuthentication(user);
+    }
+  });
+
+  logoutButton.addEventListener("click", async () => {
+    logoutButton.disabled = true;
+    try {
+      await signOut(auth);
+      window.location.replace("/cliente/");
+    } catch {
+      showMessage("No se pudo cerrar la sesión. Inténtalo nuevamente.", true);
+      logoutButton.disabled = false;
     }
   });
 

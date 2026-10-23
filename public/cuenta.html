@@ -14,10 +14,19 @@
     <h1 id="account-heading">Inicia sesión</h1>
     <p id="account-description" class="muted">Ingresa a tu cuenta para solicitar y gestionar tu reserva.</p>
 
-    <div class="account-mode" role="group" aria-label="Elige una opción">
+    <div id="account-mode" class="account-mode" role="group" aria-label="Elige una opción">
       <button id="login-mode" class="mode-button is-active" type="button" aria-pressed="true">Iniciar sesión</button>
       <button id="register-mode" class="mode-button" type="button" aria-pressed="false">Crear cuenta</button>
     </div>
+
+    <section id="signed-in-view" class="panel account-session" aria-live="polite" hidden>
+      <p>Sesión iniciada como</p>
+      <p id="account-user-email" class="account-session-email"></p>
+      <div class="account-session-actions">
+        <a class="button" href="/cliente/">Ver cabañas</a>
+        <button id="account-logout" class="button button-secondary" type="button">Cerrar sesión</button>
+      </div>
+    </section>
 
     <form id="account-form" class="stack-form">
       <label id="name-label" for="account-name" hidden>Nombre</label>

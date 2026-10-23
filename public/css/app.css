@@ -104,6 +104,11 @@ td { min-width: 105px; }
 .mode-button { min-height: 40px; border: 0; border-radius: 9px; color: var(--muted); background: transparent; font-weight: 700; }
 .mode-button.is-active { color: var(--forest-dark); background: var(--surface); box-shadow: 0 2px 8px rgba(31, 43, 41, .08); }
 .account-card .stack-form { margin-top: 1rem; }
+.account-session { margin-top: 1rem; }
+.account-session p { margin-bottom: .3rem; }
+.account-session-email { overflow-wrap: anywhere; font-weight: 750; }
+.account-session-actions { display: grid; gap: .65rem; margin-top: 1rem; }
+.account-session-actions .button { width: 100%; }
 .field-hint { margin: -.4rem 0 .2rem; color: var(--muted); font-size: .8rem; }
 .account-admin-link { margin: 1.5rem 0 0; color: var(--muted); font-size: .88rem; }
 button.text-button { font-size: .9rem; }
