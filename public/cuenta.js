@@ -98,7 +98,19 @@ async function continueAfterAuthentication(user) {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.status === 403) {
-        window.location.replace("/cliente/");
+        if (authFlowInProgress) {
+          // A valid customer account submitted the shared sign-in form. Let
+          // them continue to reservations instead of treating it as a login error.
+          window.location.replace("/cliente/");
+          return;
+        }
+
+        // An already signed-in customer chose the admin link. Keep them on
+        // the admin entry page and let them sign in with a different account.
+        showAccountState(null);
+        document.querySelector("#account-heading").textContent = "Acceso administrador";
+        accountDescription.textContent = "La sesión actual es de cliente. Ingresa con una cuenta administradora para abrir el panel.";
+        showMessage("La cuenta con sesión activa no tiene acceso al panel. Puedes iniciar sesión con otra cuenta.", true);
         return;
       }
       if (!response.ok) {
