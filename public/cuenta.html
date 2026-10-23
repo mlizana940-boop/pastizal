@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Inicia sesión o crea tu cuenta para solicitar una reserva.">
+  <title>Mi cuenta · Cabañas Chiloé</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="auth-page">
+  <main class="auth-card account-card">
+    <a class="back-link" href="/cliente/">← Ver cabañas</a>
+    <p class="eyebrow">Cabañas Chiloé</p>
+    <h1 id="account-heading">Inicia sesión</h1>
+    <p id="account-description" class="muted">Ingresa a tu cuenta para solicitar y gestionar tu reserva.</p>
+
+    <div class="account-mode" role="group" aria-label="Elige una opción">
+      <button id="login-mode" class="mode-button is-active" type="button" aria-pressed="true">Iniciar sesión</button>
+      <button id="register-mode" class="mode-button" type="button" aria-pressed="false">Crear cuenta</button>
+    </div>
+
+    <form id="account-form" class="stack-form">
+      <label id="name-label" for="account-name" hidden>Nombre</label>
+      <input id="account-name" name="name" autocomplete="name" minlength="2" maxlength="120" placeholder="Tu nombre" hidden>
+      <label for="account-email">Correo electrónico</label>
+      <input id="account-email" name="email" type="email" autocomplete="username" required>
+      <label for="account-password">Contraseña</label>
+      <input id="account-password" name="password" type="password" autocomplete="current-password" minlength="6" required>
+      <p id="password-hint" class="field-hint" hidden>Usa al menos 6 caracteres.</p>
+      <button id="account-submit" class="button" type="submit">Iniciar sesión</button>
+    </form>
+    <p id="account-message" class="notice" role="status" aria-live="polite"></p>
+    <p class="account-admin-link">¿Administras las cabañas? <a href="/admin/login.html">Acceso de administrador</a></p>
+  </main>
+  <script type="module" src="/cuenta.js"></script>
+</body>
+</html>

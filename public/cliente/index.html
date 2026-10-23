@@ -3,15 +3,70 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reservas · Cabañas Chiloé</title>
+  <meta name="description" content="Explora cabañas en Chiloé y revisa disponibilidad para tus fechas.">
+  <title>Cabañas en Chiloé · Reservas</title>
   <link rel="stylesheet" href="/css/app.css">
 </head>
-<body>
-  <main class="landing-card">
-    <p class="eyebrow">Cabañas Chiloé</p>
-    <h1>Vista de clientes</h1>
-    <p>Este espacio queda preparado para la vista de búsqueda y reservas.</p>
-    <a class="button button-secondary" href="/">Volver al inicio</a>
+<body class="guest-page">
+  <header class="app-header guest-header">
+    <a class="brand-link" href="/cliente/" aria-label="Cabañas Chiloé, inicio">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <span><span class="eyebrow">Chiloé · Alojamiento</span><strong>Cabañas Chiloé</strong></span>
+    </a>
+    <nav class="header-actions" aria-label="Cuenta">
+      <a id="admin-access" class="text-button" href="/admin/login.html">Acceso administrador</a>
+      <a id="account-link" class="button button-secondary" href="/cuenta.html?next=%2Fcliente%2F">Iniciar sesión</a>
+      <button id="logout-button" class="button button-secondary" type="button" hidden>Cerrar sesión</button>
+    </nav>
+  </header>
+
+  <main class="guest-main">
+    <section class="guest-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Descubre la isla</p>
+        <h1>Tu próxima pausa está en Chiloé</h1>
+        <p>Explora nuestras cabañas, revisa qué fechas están disponibles y solicita tu estadía cuando encuentres el lugar indicado.</p>
+      </div>
+      <form id="search-form" class="search-form">
+        <label>Entrada<input id="search-entry" name="fechaEntrada" type="date"></label>
+        <label>Salida<input id="search-exit" name="fechaSalida" type="date"></label>
+        <label>Huéspedes<input id="search-guests" name="huespedes" type="number" min="1" max="30" value="2"></label>
+        <button class="button" type="submit">Buscar cabañas</button>
+      </form>
+    </section>
+
+    <section class="results-section" aria-labelledby="cabins-heading">
+      <div class="section-heading">
+        <div><p class="eyebrow">Alojamientos</p><h2 id="cabins-heading">Cabañas para tu viaje</h2></div>
+        <p id="results-count" class="muted"></p>
+      </div>
+      <p id="page-message" class="notice" role="status" aria-live="polite"></p>
+      <div id="cabins-list" class="cabins-grid" aria-live="polite"></div>
+    </section>
+
+    <section id="booking-panel" class="panel booking-panel" aria-labelledby="booking-heading" hidden>
+      <div class="panel-heading">
+        <div><p class="eyebrow">Solicitud de reserva</p><h2 id="booking-heading">Completa tus datos</h2></div>
+        <button id="close-booking" class="text-button" type="button">Cerrar</button>
+      </div>
+      <p id="selected-cabin" class="muted"></p>
+      <form id="booking-form" class="cabin-form booking-form">
+        <input id="booking-cabin-id" type="hidden">
+        <label>Nombre completo<input id="booking-name" name="nombre" autocomplete="name" minlength="2" maxlength="120" required></label>
+        <label>Correo de la cuenta<input id="booking-email" name="email" type="email" autocomplete="email" readonly required></label>
+        <label>Teléfono<input id="booking-phone" name="telefono" type="tel" autocomplete="tel" minlength="6" maxlength="30" required></label>
+        <label>Entrada<input id="booking-entry" name="fechaEntrada" type="date" required></label>
+        <label>Salida<input id="booking-exit" name="fechaSalida" type="date" required></label>
+        <label>Huéspedes<input id="booking-guests" name="huespedes" type="number" min="1" max="30" required></label>
+        <div class="form-actions wide-field">
+          <button id="submit-booking" class="button" type="submit">Enviar solicitud</button>
+        </div>
+      </form>
+      <p id="booking-message" class="notice" role="status" aria-live="polite"></p>
+    </section>
   </main>
+
+  <footer class="guest-footer"><span>Chiloé · Chile</span><a href="/cuenta.html?next=%2Fcliente%2F">Mi cuenta</a></footer>
+  <script type="module" src="/cliente/cliente.js"></script>
 </body>
 </html>

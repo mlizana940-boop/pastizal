@@ -62,6 +62,7 @@ async function createWithAvailability(data) {
     const reservation = {
       cabanaId: data.cabanaId,
       cabanaNombre: cabin.nombre,
+      clienteUid: data.clienteUid,
       cliente: data.cliente,
       huespedes: data.huespedes,
       fechaEntrada: data.fechaEntrada,

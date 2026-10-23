@@ -5,6 +5,7 @@ const { requireAdmin } = require("../middleware/requireAdmin");
 
 const router = express.Router();
 router.use(requireAdmin);
+router.get("/session", (req, res) => res.json({ data: { uid: req.user.uid } }));
 router.get("/cabanas", cabanaController.listTodas);
 router.post("/cabanas", cabanaController.create);
 router.put("/cabanas/:id", cabanaController.update);

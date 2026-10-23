@@ -1,7 +1,7 @@
 const reservaService = require("../services/reserva.service");
 
 async function create(req, res) {
-  res.status(201).json({ data: await reservaService.create(req.body) });
+  res.status(201).json({ data: await reservaService.create(req.body, req.user) });
 }
 
 async function list(req, res) {

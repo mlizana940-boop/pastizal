@@ -1,14 +1,14 @@
 # Reservas de cabañas en Chiloé
 
-Aplicación web de reservas de cabañas en Chiloé. Los clientes pueden consultar cabañas y solicitar reservas; el personal administrador puede gestionar cabañas y solicitudes desde un panel privado.
+Aplicación web de reservas de cabañas en Chiloé. Cualquier visitante puede explorar cabañas y disponibilidad; para solicitar una reserva debe crear una cuenta o iniciar sesión. El personal administrador usa el mismo acceso y gestiona cabañas y solicitudes desde un panel privado.
 
 ## Arquitectura
 
 La arquitectura principal es **cliente-servidor**:
 
 ```text
-Navegador (HTML/CSS/JS) ⇄ API Node.js + Express ⇄ Cloud Firestore
-Administrador ⇄ Firebase Authentication → token verificado por la API
+Visitante ⇄ catálogo público (HTML/CSS/JS) ⇄ API Node.js + Express ⇄ Cloud Firestore
+Cliente o administrador ⇄ Firebase Authentication → token verificado por la API
 ```
 
 El navegador no escribe en Firestore. La API recibe las solicitudes, valida los datos y aplica las reglas de negocio antes de usar Firebase Admin SDK. Las carpetas `controllers`, `services`, `models` y `repositories` ordenan el código del servidor; no representan una arquitectura MVC que el equipo deba presentar.
@@ -33,7 +33,7 @@ public/
   css/
 ```
 
-La vista de clientes queda como espacio de trabajo para quien la implementará. El inicio incluye el acceso al panel administrativo.
+La vista `/` y `/cliente/` permite explorar cabañas sin iniciar sesión. El acceso compartido está en `/cuenta.html`; solicitar una reserva requiere una cuenta. El enlace de administración conduce al mismo acceso y el servidor autoriza el panel solo a administradores.
 
 ## Requisitos locales
 
@@ -79,12 +79,16 @@ firebase deploy --only firestore:rules
 ### Rutas públicas
 
 - `GET /api/cabanas`: lista cabañas activas; acepta `fechaEntrada`, `fechaSalida` y `huespedes` para filtrar por disponibilidad y capacidad.
-- `POST /api/reservas`: registra una solicitud pendiente y valida disponibilidad.
+
+### Rutas que requieren iniciar sesión
+
+- `POST /api/reservas`: registra una solicitud pendiente y valida disponibilidad. Requiere Firebase ID token en `Authorization: Bearer <token>`; el correo y UID del cliente se obtienen de la sesión validada.
 
 ### Rutas de administrador
 
-Todas requieren un Firebase ID token en `Authorization: Bearer <token>` y un UID incluido en `FIREBASE_ADMIN_UIDS`.
+Todas requieren un Firebase ID token en `Authorization: Bearer <token>` y una cuenta autorizada por UID en `FIREBASE_ADMIN_UIDS` o por la custom claim `admin: true`.
 
+- `GET /api/admin/session`
 - `GET /api/admin/cabanas`
 - `POST /api/admin/cabanas`
 - `PUT /api/admin/cabanas/:id`

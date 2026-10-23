@@ -63,6 +63,51 @@ td { min-width: 105px; }
 .danger-text { color: var(--danger); }
 .filter-label { display: flex; align-items: center; gap: .6rem; color: var(--muted); font-size: .9rem; }
 .filter-label select { width: auto; min-width: 150px; }
+.guest-page { background: #f2f2ea; }
+.guest-header { position: relative; z-index: 1; padding-top: 1rem; padding-bottom: 1rem; }
+.brand-link { display: inline-flex; align-items: center; gap: .75rem; color: var(--ink); text-decoration: none; }
+.brand-link > span:last-child { display: grid; line-height: 1.2; }
+.brand-link .eyebrow { margin-bottom: .25rem; }
+.brand-mark { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 15px 15px 15px 5px; color: #fff; background: var(--forest); font-family: Georgia, serif; font-size: 1.6rem; }
+.header-actions { flex-wrap: wrap; }
+.guest-main { width: min(1180px, calc(100% - 2.5rem)); margin: 1.5rem auto 4rem; }
+.guest-hero { display: grid; grid-template-columns: 1fr minmax(320px, .88fr); align-items: end; gap: 2rem; padding: clamp(1.5rem, 5vw, 3.5rem); overflow: hidden; border: 1px solid #d3dfd4; border-radius: 26px; background: radial-gradient(ellipse at 90% 10%, rgba(197, 214, 186, .72), transparent 35%), linear-gradient(125deg, #e7eee2, #f9f4e7 68%, #ebe0c7); }
+.hero-copy { max-width: 570px; }
+.hero-copy h1 { max-width: 540px; margin: .4rem 0 .8rem; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.35rem, 5vw, 4.3rem); font-weight: 500; letter-spacing: -.04em; }
+.hero-copy > p:last-child { max-width: 500px; margin-bottom: 0; color: #52615b; font-size: 1.05rem; }
+.search-form { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; padding: 1rem; border: 1px solid rgba(255,255,255,.75); border-radius: 17px; background: rgba(255, 254, 250, .86); box-shadow: 0 12px 35px rgba(31, 43, 41, .08); }
+.search-form label, .booking-form label { display: grid; gap: .35rem; color: var(--muted); font-size: .78rem; font-weight: 750; }
+.search-form label:nth-child(3) { grid-column: 1 / -1; }
+.search-form .button { grid-column: 1 / -1; }
+.results-section { margin-top: 2.5rem; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
+.section-heading h2 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.55rem, 3vw, 2rem); font-weight: 500; }
+.section-heading .muted { margin: 0 0 .15rem; }
+.cabins-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; margin-top: 1rem; }
+.cabin-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); box-shadow: 0 5px 20px rgba(31, 43, 41, .04); }
+.cabin-image, .cabin-image-fallback { width: 100%; height: 205px; object-fit: cover; background: linear-gradient(135deg, #cad8c5, #e7ddc5 58%, #abc1b4); }
+.cabin-image-fallback { display: grid; place-items: center; color: rgba(36, 67, 50, .7); font-family: Georgia, serif; font-size: 3.4rem; }
+.cabin-card-content { display: flex; flex: 1; flex-direction: column; padding: 1.1rem; }
+.cabin-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; }
+.cabin-card h3 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.35rem; font-weight: 500; }
+.cabin-price { flex: 0 0 auto; color: var(--forest-dark); font-size: .9rem; font-weight: 800; text-align: right; }
+.cabin-price small { display: block; color: var(--muted); font-size: .68rem; font-weight: 500; }
+.cabin-description { min-height: 3rem; margin: .7rem 0; color: var(--muted); font-size: .9rem; }
+.cabin-meta { display: flex; flex-wrap: wrap; gap: .4rem; margin: auto 0 1rem; padding: 0; list-style: none; }
+.cabin-meta li { padding: .25rem .55rem; border-radius: 999px; color: #43544b; background: #eef1e9; font-size: .72rem; }
+.cabin-card .button { width: 100%; }
+.booking-panel { margin: 2rem 0; scroll-margin-top: 1.5rem; }
+.booking-panel[hidden] { display: none; }
+.booking-form { margin-top: 1rem; }
+.guest-footer { display: flex; justify-content: space-between; gap: 1rem; padding: 1.25rem max(1.25rem, calc((100vw - 1180px) / 2)); border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+.account-mode { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; margin-top: 1.5rem; padding: .3rem; border-radius: 12px; background: #eef1eb; }
+.mode-button { min-height: 40px; border: 0; border-radius: 9px; color: var(--muted); background: transparent; font-weight: 700; }
+.mode-button.is-active { color: var(--forest-dark); background: var(--surface); box-shadow: 0 2px 8px rgba(31, 43, 41, .08); }
+.account-card .stack-form { margin-top: 1rem; }
+.field-hint { margin: -.4rem 0 .2rem; color: var(--muted); font-size: .8rem; }
+.account-admin-link { margin: 1.5rem 0 0; color: var(--muted); font-size: .88rem; }
+button.text-button { font-size: .9rem; }
+[hidden] { display: none !important; }
 @media (max-width: 760px) {
   .app-header { align-items: flex-start; flex-direction: column; }
   .header-actions { width: 100%; justify-content: space-between; }
@@ -71,4 +116,23 @@ td { min-width: 105px; }
   .wide-field { grid-column: auto; }
   .filter-label { align-items: flex-start; flex-direction: column; }
   .filter-label select { width: 100%; }
+  .guest-hero { grid-template-columns: 1fr; gap: 1.5rem; }
+  .search-form { grid-template-columns: 1fr 1fr; }
+  .cabins-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cabin-image, .cabin-image-fallback { height: 175px; }
+}
+@media (max-width: 520px) {
+  .guest-main { width: min(100% - 1.5rem, 1180px); margin-top: .75rem; }
+  .guest-header { padding: .9rem .75rem; }
+  .guest-header .header-actions { align-items: center; gap: .65rem; }
+  .guest-header .text-button { font-size: .78rem; }
+  .brand-mark { width: 40px; height: 40px; }
+  .guest-hero { padding: 1.3rem; border-radius: 20px; }
+  .hero-copy h1 { font-size: 2.55rem; }
+  .search-form { grid-template-columns: 1fr; }
+  .search-form label:nth-child(3), .search-form .button { grid-column: auto; }
+  .cabins-grid { grid-template-columns: 1fr; }
+  .cabin-image, .cabin-image-fallback { height: 220px; }
+  .section-heading { align-items: flex-start; flex-direction: column; }
+  .guest-footer { padding: 1rem .75rem; }
 }
