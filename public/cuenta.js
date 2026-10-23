@@ -98,7 +98,7 @@ async function continueAfterAuthentication(user) {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.status === 403) {
-        showMessage("La cuenta inició sesión, pero no tiene acceso de administrador.", true);
+        window.location.replace("/cliente/");
         return;
       }
       if (!response.ok) {
