@@ -63,14 +63,12 @@ function renderCabins() {
     edit.textContent = "Editar";
     edit.dataset.editCabin = cabin.id;
     actions.append(edit);
-    if (cabin.activa) {
-      const deactivate = document.createElement("button");
-      deactivate.className = "text-button danger-text";
-      deactivate.type = "button";
-      deactivate.textContent = "Desactivar";
-      deactivate.dataset.deactivateCabin = cabin.id;
-      actions.append(deactivate);
-    }
+    const remove = document.createElement("button");
+    remove.className = "text-button danger-text";
+    remove.type = "button";
+    remove.textContent = "Eliminar";
+    remove.dataset.deleteCabin = cabin.id;
+    actions.append(remove);
     row.append(actions);
     cabinsTable.append(row);
   });
@@ -181,7 +179,7 @@ cabinForm.addEventListener("submit", async (event) => {
 document.querySelector("#cancel-edit").addEventListener("click", resetCabinForm);
 cabinsTable.addEventListener("click", async (event) => {
   const editId = event.target.dataset.editCabin;
-  const deactivateId = event.target.dataset.deactivateCabin;
+  const deleteId = event.target.dataset.deleteCabin;
   if (editId) {
     const cabin = cabins.find((item) => item.id === editId);
     if (!cabin) return;
@@ -196,10 +194,14 @@ cabinsTable.addEventListener("click", async (event) => {
     document.querySelector("#cancel-edit").hidden = false;
     document.querySelector("#cabin-name").focus();
   }
-  if (deactivateId && window.confirm("¿Desactivar esta cabaña? Se conservará el historial de reservas.")) {
+  const cabin = cabins.find((item) => item.id === deleteId);
+  const confirmed = deleteId && cabin && window.confirm(
+    `¿Eliminar permanentemente “${cabin.nombre}”? Se conservarán las reservas históricas. No se puede eliminar si tiene reservas pendientes o confirmadas.`
+  );
+  if (confirmed) {
     try {
-      await api(`cabanas/${encodeURIComponent(deactivateId)}`, { method: "DELETE" });
-      showMessage("Cabaña desactivada.");
+      await api(`cabanas/${encodeURIComponent(deleteId)}`, { method: "DELETE" });
+      showMessage("Cabaña eliminada.");
       await loadData();
     } catch (error) {
       showMessage(error.message, true);

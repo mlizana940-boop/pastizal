@@ -66,7 +66,7 @@ Abre `http://localhost:3000`. La API responde en el mismo origen; `GET /api/heal
 - `reservas`: cabaña, datos de contacto del cliente, fechas, huéspedes, total estimado y estado.
 - `cabanas/{cabanaId}/nochesOcupadas/{AAAA-MM-DD}`: bloqueo de cada noche de una reserva pendiente o confirmada.
 
-La solicitud valida fechas, contacto, capacidad y disponibilidad. Las noches se bloquean junto con la reserva en una transacción. Las reservas pendientes bloquean fechas hasta que administración las confirme, rechace o cancele. Una cabaña se desactiva de forma lógica para conservar el historial.
+La solicitud valida fechas, contacto, capacidad y disponibilidad. Las noches se bloquean junto con la reserva en una transacción. Las reservas pendientes bloquean fechas hasta que administración las confirme, rechace o cancele. Al eliminar una cabaña se borran sus datos y noches ocupadas, pero se conservan las reservas históricas, que guardan una copia del nombre y precio. Para proteger reservas vigentes, no se permite eliminar una cabaña con solicitudes pendientes o confirmadas.
 
 El archivo `firestore.rules` deniega acceso directo desde clientes web. La API usa Firebase Admin SDK, que opera con credenciales de servidor; por eso la autorización de administrador se verifica en Express. Puedes desplegar las reglas con Firebase CLI después de seleccionar el proyecto correspondiente:
 
@@ -92,7 +92,7 @@ Todas requieren un Firebase ID token en `Authorization: Bearer <token>` y una cu
 - `GET /api/admin/cabanas`
 - `POST /api/admin/cabanas`
 - `PUT /api/admin/cabanas/:id`
-- `DELETE /api/admin/cabanas/:id`: desactiva la cabaña.
+- `DELETE /api/admin/cabanas/:id`: elimina la cabaña y sus noches ocupadas; conserva las reservas históricas y responde con conflicto si aún hay reservas pendientes o confirmadas.
 - `GET /api/admin/reservas?estado=pendiente`
 - `PATCH /api/admin/reservas/:id/estado` con `estado`: `confirmada`, `rechazada` o `cancelada`.
 

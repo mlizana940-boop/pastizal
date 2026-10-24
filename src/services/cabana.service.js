@@ -18,8 +18,8 @@ async function update(id, input) {
   return cabanaRepository.update(id, validateCabana(input));
 }
 
-async function deactivate(id) {
-  return cabanaRepository.deactivate(id);
+async function remove(id) {
+  return cabanaRepository.remove(id);
 }
 
-module.exports = { create, deactivate, listPublicas, listTodas, update };
+module.exports = { create, listPublicas, listTodas, remove, update };
