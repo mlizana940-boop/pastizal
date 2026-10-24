@@ -9,7 +9,7 @@ router.get("/session", (req, res) => res.json({ data: { uid: req.user.uid } }));
 router.get("/cabanas", cabanaController.listTodas);
 router.post("/cabanas", cabanaController.create);
 router.put("/cabanas/:id", cabanaController.update);
-router.delete("/cabanas/:id", cabanaController.deactivate);
+router.delete("/cabanas/:id", cabanaController.remove);
 router.get("/reservas", reservaController.list);
 router.patch("/reservas/:id/estado", reservaController.updateStatus);
 

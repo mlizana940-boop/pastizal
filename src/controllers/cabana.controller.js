@@ -16,8 +16,8 @@ async function update(req, res) {
   res.json({ data: await cabanaService.update(req.params.id, req.body) });
 }
 
-async function deactivate(req, res) {
-  res.json({ data: await cabanaService.deactivate(req.params.id) });
+async function remove(req, res) {
+  res.json({ data: await cabanaService.remove(req.params.id) });
 }
 
-module.exports = { create, deactivate, listPublicas, listTodas, update };
+module.exports = { create, listPublicas, listTodas, remove, update };
