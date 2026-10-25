@@ -15,11 +15,22 @@ async function create(input, user) {
   return reservaRepository.createWithAvailability(data);
 }
 
-async function list(estado) {
+async function list(estado, cursor) {
   if (estado && !ESTADOS_RESERVA.includes(estado)) {
     throw new HttpError(400, "El filtro de estado no es válido.");
   }
-  return reservaRepository.list({ estado });
+  const [page, hasOverduePending] = await Promise.all([
+    reservaRepository.listForAdmin({ estado, cursor }),
+    reservaRepository.hasOverduePending()
+  ]);
+  return { ...page, hasOverduePending };
+}
+
+async function listMine(uid, cursor) {
+  if (typeof uid !== "string" || !uid) {
+    throw new HttpError(401, "Inicia sesión para consultar tus reservas.");
+  }
+  return reservaRepository.listForClient(uid, cursor);
 }
 
 async function updateStatus(id, estado) {
@@ -29,4 +40,4 @@ async function updateStatus(id, estado) {
   return reservaRepository.updateStatus(id, estado);
 }
 
-module.exports = { create, list, updateStatus };
+module.exports = { create, list, listMine, updateStatus };

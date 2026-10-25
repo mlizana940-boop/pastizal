@@ -1,5 +1,5 @@
 const { HttpError } = require("../utils/httpError");
-const { buildNightKeys } = require("../utils/fechas");
+const { assertEntryDateNotPast, buildNightKeys } = require("../utils/fechas");
 
 const ESTADOS_RESERVA = ["pendiente", "confirmada", "rechazada", "cancelada"];
 
@@ -11,6 +11,7 @@ function validateReserva(input = {}) {
   const huespedes = Number(input.huespedes);
   const fechaEntrada = input.fechaEntrada;
   const fechaSalida = input.fechaSalida;
+  assertEntryDateNotPast(fechaEntrada);
   const noches = buildNightKeys(fechaEntrada, fechaSalida);
 
   if (!cabanaId) throw new HttpError(400, "Selecciona una cabaña.");

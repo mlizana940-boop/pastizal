@@ -18,6 +18,37 @@ function showMessage(target, text, isError = false) {
   target.className = isError ? "notice notice-error" : "notice";
 }
 
+function todayInChile() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Santiago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function syncDateConstraints(entryInput, exitInput) {
+  const today = todayInChile();
+  entryInput.min = today;
+  if (entryInput.value && entryInput.value < today) {
+    entryInput.value = "";
+    exitInput.value = "";
+  }
+  exitInput.min = entryInput.value && entryInput.value >= today ? entryInput.value : today;
+  if (exitInput.value && exitInput.value < exitInput.min) exitInput.value = "";
+}
+
+const searchEntryInput = document.querySelector("#search-entry");
+const searchExitInput = document.querySelector("#search-exit");
+const bookingEntryInput = document.querySelector("#booking-entry");
+const bookingExitInput = document.querySelector("#booking-exit");
+searchEntryInput.addEventListener("input", () => syncDateConstraints(searchEntryInput, searchExitInput));
+bookingEntryInput.addEventListener("input", () => syncDateConstraints(bookingEntryInput, bookingExitInput));
+syncDateConstraints(searchEntryInput, searchExitInput);
+syncDateConstraints(bookingEntryInput, bookingExitInput);
+
 function readDraft() {
   try {
     const draft = JSON.parse(sessionStorage.getItem(draftKey) || "null");
@@ -33,6 +64,7 @@ if (savedDraft) {
   document.querySelector("#search-entry").value = savedDraft.fechaEntrada || "";
   document.querySelector("#search-exit").value = savedDraft.fechaSalida || "";
   document.querySelector("#search-guests").value = savedDraft.huespedes || 2;
+  syncDateConstraints(searchEntryInput, searchExitInput);
 }
 
 function renderCabins(items) {
@@ -51,7 +83,11 @@ function renderCabins(items) {
   items.forEach((cabin) => {
     const card = document.createElement("article");
     card.className = "cabin-card";
-    if (typeof cabin.imagenUrl === "string" && /^https:\/\//i.test(cabin.imagenUrl)) {
+    const hasValidImageUrl = typeof cabin.imagenUrl === "string" && (
+      /^https:\/\//i.test(cabin.imagenUrl)
+      || /^\/uploads\/[A-Za-z0-9_-]{1,150}\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\.(?:jpg|png|webp)$/i.test(cabin.imagenUrl)
+    );
+    if (hasValidImageUrl) {
       const image = document.createElement("img");
       image.className = "cabin-image";
       image.src = cabin.imagenUrl;
@@ -157,6 +193,7 @@ function openBooking(draft, user = currentUser) {
   document.querySelector("#booking-phone").value = draft.telefono || "";
   document.querySelector("#booking-entry").value = draft.fechaEntrada || "";
   document.querySelector("#booking-exit").value = draft.fechaSalida || "";
+  syncDateConstraints(bookingEntryInput, bookingExitInput);
   document.querySelector("#booking-guests").value = draft.huespedes || 2;
   showMessage(bookingMessage, "");
   bookingPanel.hidden = false;
@@ -251,6 +288,7 @@ if (firebaseConfigReady) {
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
     document.querySelector("#account-link").hidden = Boolean(user);
+    document.querySelector("#reservations-link").hidden = !user;
     document.querySelector("#logout-button").hidden = !user;
     if (user && savedDraft) openBooking(savedDraft, user);
   });

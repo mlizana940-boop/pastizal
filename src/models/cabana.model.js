@@ -6,6 +6,7 @@ function validateCabana(input = {}) {
   const precioPorNoche = Number(input.precioPorNoche);
   const capacidad = Number(input.capacidad);
   const imagenUrl = typeof input.imagenUrl === "string" ? input.imagenUrl.trim() : "";
+  const isManagedImage = /^\/uploads\/[A-Za-z0-9_-]{1,150}\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\.(?:jpg|png|webp)$/i.test(imagenUrl);
   const comodidades = Array.isArray(input.comodidades)
     ? input.comodidades.map((item) => String(item).trim()).filter(Boolean)
     : [];
@@ -22,8 +23,8 @@ function validateCabana(input = {}) {
   if (descripcion.length > 1000) {
     throw new HttpError(400, "La descripción no puede superar los 1000 caracteres.");
   }
-  if (imagenUrl && !/^https:\/\//i.test(imagenUrl)) {
-    throw new HttpError(400, "La URL de imagen debe comenzar con https://.");
+  if (imagenUrl && !/^https:\/\//i.test(imagenUrl) && !isManagedImage) {
+    throw new HttpError(400, "La imagen debe usar una URL https:// válida o una imagen cargada en el servidor.");
   }
   if (comodidades.length > 20) {
     throw new HttpError(400, "Una cabaña puede tener hasta 20 comodidades.");

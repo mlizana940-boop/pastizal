@@ -14,6 +14,7 @@
     </div>
     <div class="header-actions">
       <span id="admin-email" class="muted"></span>
+      <a class="button button-secondary" href="/cliente/">Ver cabañas</a>
       <button id="logout-button" class="button button-secondary" type="button">Cerrar sesión</button>
     </div>
   </header>
@@ -22,8 +23,8 @@
     <p id="page-message" class="notice" role="status" aria-live="polite"></p>
     <section class="summary-grid" aria-label="Resumen">
       <article class="summary-card"><span>Cabañas activas</span><strong id="active-count">—</strong></article>
-      <article class="summary-card"><span>Reservas pendientes</span><strong id="pending-count">—</strong></article>
-      <article class="summary-card"><span>Reservas registradas</span><strong id="reservation-count">—</strong></article>
+      <article class="summary-card"><span>Pendientes visibles</span><strong id="pending-count">—</strong></article>
+      <article class="summary-card"><span>En esta página</span><strong id="reservation-count">—</strong></article>
     </section>
 
     <section class="panel" aria-labelledby="cabins-title">
@@ -36,7 +37,15 @@
         <label>Precio por noche (CLP)<input id="cabin-price" name="precioPorNoche" type="number" min="1" step="1" required></label>
         <label>Capacidad<input id="cabin-capacity" name="capacidad" type="number" min="1" max="30" step="1" required></label>
         <label class="wide-field">Descripción<textarea id="cabin-description" name="descripcion" maxlength="1000" rows="3"></textarea></label>
-        <label>URL de imagen<input id="cabin-image" name="imagenUrl" type="url" placeholder="https://…"></label>
+        <input id="cabin-image-url" type="hidden">
+        <label class="wide-field">Imagen de la cabaña
+          <input id="cabin-image-file" type="file" accept="image/jpeg,image/png,image/webp">
+          <small class="muted">JPG, PNG o WebP · máximo 3 MB. Si editas una cabaña y no eliges otra imagen, se conserva la actual.</small>
+        </label>
+        <div id="cabin-image-preview" class="image-upload-preview wide-field" hidden>
+          <img id="cabin-image-preview-img" alt="Vista previa de la imagen de la cabaña">
+          <p id="cabin-image-details" class="muted" aria-live="polite"></p>
+        </div>
         <label>Comodidades<input id="cabin-amenities" name="comodidades" placeholder="Wi-Fi, tinaja, estacionamiento"></label>
         <div class="form-actions wide-field">
           <button id="save-cabin" class="button" type="submit">Guardar cabaña</button>
@@ -64,12 +73,18 @@
           </select>
         </label>
       </div>
+      <p id="pending-alert" class="warning-notice" role="status" aria-live="polite" hidden>Hay solicitudes pendientes desde hace más de 24 horas. Revísalas para confirmar o rechazar; si no se concretan, cancélalas para liberar las fechas.</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Cliente</th><th>Cabaña</th><th>Fechas</th><th>Huéspedes</th><th>Total estimado</th><th>Estado</th><th>Acción</th></tr></thead>
           <tbody id="reservations-table"></tbody>
         </table>
       </div>
+      <nav class="pagination" aria-label="Paginación de reservas">
+        <button id="reservations-previous" class="button button-secondary" type="button" disabled>Anterior</button>
+        <span id="reservations-page" class="muted">Página 1</span>
+        <button id="reservations-next" class="button button-secondary" type="button" disabled>Siguiente</button>
+      </nav>
     </section>
   </main>
   <script type="module" src="/admin/admin.js"></script>

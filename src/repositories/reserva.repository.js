@@ -1,4 +1,4 @@
-const { FieldValue } = require("firebase-admin/firestore");
+const { FieldValue, Timestamp } = require("firebase-admin/firestore");
 const { db } = require("../config/firebaseAdmin");
 const { HttpError } = require("../utils/httpError");
 const { buildNightKeys } = require("../utils/fechas");
@@ -6,6 +6,8 @@ const { buildNightKeys } = require("../utils/fechas");
 const reservations = db.collection("reservas");
 const cabins = db.collection("cabanas");
 const ACTIVE_STATES = new Set(["pendiente", "confirmada"]);
+const RESERVATION_PAGE_SIZE = 20;
+const PENDING_ALERT_AGE_MS = 24 * 60 * 60 * 1000;
 
 function serializeDate(value) {
   return value && typeof value.toDate === "function" ? value.toDate().toISOString() : value;
@@ -13,20 +15,70 @@ function serializeDate(value) {
 
 function toReserva(snapshot) {
   const data = snapshot.data();
+  const createdAt = serializeDate(data.createdAt);
   return {
     id: snapshot.id,
     ...data,
-    createdAt: serializeDate(data.createdAt),
-    updatedAt: serializeDate(data.updatedAt)
+    createdAt,
+    updatedAt: serializeDate(data.updatedAt),
+    pendienteAntigua: data.estado === "pendiente"
+      && Date.now() - Date.parse(createdAt) >= PENDING_ALERT_AGE_MS
   };
 }
 
-async function list({ estado } = {}) {
-  const snapshot = await reservations.limit(500).get();
-  return snapshot.docs
-    .map(toReserva)
-    .filter((reserva) => !estado || reserva.estado === estado)
-    .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+function buildReservationQuery({ estado, clienteUid } = {}) {
+  let query = reservations;
+  if (clienteUid) query = query.where("clienteUid", "==", clienteUid);
+  if (estado) query = query.where("estado", "==", estado);
+  return query.orderBy("createdAt", "desc");
+}
+
+async function readCursor(cursor, { clienteUid } = {}) {
+  if (!cursor) return null;
+  if (typeof cursor !== "string" || !/^[A-Za-z0-9_-]{1,150}$/.test(cursor)) {
+    throw new HttpError(400, "El cursor de paginación no es válido.");
+  }
+
+  const snapshot = await reservations.doc(cursor).get();
+  if (!snapshot.exists) throw new HttpError(400, "El cursor de paginación ya no existe.");
+  const data = snapshot.data();
+  if (clienteUid && data.clienteUid !== clienteUid) {
+    throw new HttpError(400, "El cursor no corresponde a esta lista de reservas.");
+  }
+  return snapshot;
+}
+
+async function listPage(filters = {}) {
+  let query = buildReservationQuery(filters);
+  const cursorSnapshot = await readCursor(filters.cursor, filters);
+  if (cursorSnapshot) query = query.startAfter(cursorSnapshot);
+
+  const snapshot = await query.limit(RESERVATION_PAGE_SIZE + 1).get();
+  const hasMore = snapshot.docs.length > RESERVATION_PAGE_SIZE;
+  const pageDocs = snapshot.docs.slice(0, RESERVATION_PAGE_SIZE);
+  return {
+    items: pageDocs.map(toReserva),
+    nextCursor: hasMore ? pageDocs[pageDocs.length - 1].id : null
+  };
+}
+
+async function listForAdmin({ estado, cursor } = {}) {
+  return listPage({ estado, cursor });
+}
+
+async function listForClient(clienteUid, cursor) {
+  return listPage({ clienteUid, cursor });
+}
+
+async function hasOverduePending() {
+  const cutoff = Timestamp.fromDate(new Date(Date.now() - PENDING_ALERT_AGE_MS));
+  const snapshot = await reservations
+    .where("estado", "==", "pendiente")
+    .where("createdAt", "<", cutoff)
+    .orderBy("createdAt", "asc")
+    .limit(1)
+    .get();
+  return !snapshot.empty;
 }
 
 async function isAvailable(cabanaId, nights) {
@@ -119,4 +171,11 @@ async function updateStatus(id, nextState) {
   });
 }
 
-module.exports = { createWithAvailability, isAvailable, list, updateStatus };
+module.exports = {
+  createWithAvailability,
+  hasOverduePending,
+  isAvailable,
+  listForAdmin,
+  listForClient,
+  updateStatus
+};

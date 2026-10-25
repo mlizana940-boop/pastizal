@@ -4,16 +4,13 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut,
-  signInWithEmailAndPassword,
-  updateProfile
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 import { firebaseConfig, firebaseConfigReady } from "/admin/firebase-config.js";
 
 const form = document.querySelector("#account-form");
 const message = document.querySelector("#account-message");
 const submitButton = document.querySelector("#account-submit");
-const nameLabel = document.querySelector("#name-label");
-const nameInput = document.querySelector("#account-name");
 const emailInput = document.querySelector("#account-email");
 const passwordInput = document.querySelector("#account-password");
 const passwordHint = document.querySelector("#password-hint");
@@ -53,9 +50,6 @@ function showMessage(text, isError = false) {
 
 function setMode(register) {
   isRegisterMode = register;
-  nameLabel.hidden = !register;
-  nameInput.hidden = !register;
-  nameInput.required = register;
   passwordInput.autocomplete = register ? "new-password" : "current-password";
   passwordHint.hidden = !register;
   document.querySelector("#account-heading").textContent = register ? "Crea tu cuenta" : "Inicia sesión";
@@ -78,7 +72,7 @@ function showAccountState(user) {
 
   if (isSignedIn) {
     document.querySelector("#account-heading").textContent = "Mi cuenta";
-    accountDescription.textContent = "Tu sesión está activa. Desde aquí puedes volver a explorar las cabañas o cerrar sesión.";
+    accountDescription.textContent = "Tu sesión está activa. Desde aquí puedes revisar tus solicitudes, volver a explorar las cabañas o cerrar sesión.";
     accountUserEmail.textContent = user.email || "Cuenta de usuario";
     return;
   }
@@ -184,14 +178,13 @@ if (!firebaseConfigReady) {
       if (isRegisterMode) {
         const credential = await createUserWithEmailAndPassword(auth, email, passwordInput.value);
         user = credential.user;
-        const displayName = nameInput.value.trim();
-        if (displayName) {
-          try {
-            await updateProfile(user, { displayName });
-          } catch {
-            // El nombre de perfil es opcional; la reserva vuelve a pedir el nombre del huésped.
-          }
-        }
+        await signOut(auth);
+        lastCheckedUserUid = null;
+        setMode(false);
+        emailInput.value = email;
+        passwordInput.value = "";
+        showMessage("Cuenta creada. Ahora inicia sesión para continuar con tu reserva.");
+        return;
       } else {
         const credential = await signInWithEmailAndPassword(auth, email, passwordInput.value);
         user = credential.user;

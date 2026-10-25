@@ -2,6 +2,7 @@ const express = require("express");
 const cabanaController = require("../controllers/cabana.controller");
 const reservaController = require("../controllers/reserva.controller");
 const { requireAdmin } = require("../middleware/requireAdmin");
+const { uploadCabanaImage } = require("../middleware/uploadCabanaImage");
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -9,6 +10,7 @@ router.get("/session", (req, res) => res.json({ data: { uid: req.user.uid } }));
 router.get("/cabanas", cabanaController.listTodas);
 router.post("/cabanas", cabanaController.create);
 router.put("/cabanas/:id", cabanaController.update);
+router.post("/cabanas/:id/imagen", uploadCabanaImage, cabanaController.replaceImage);
 router.delete("/cabanas/:id", cabanaController.remove);
 router.get("/reservas", reservaController.list);
 router.patch("/reservas/:id/estado", reservaController.updateStatus);

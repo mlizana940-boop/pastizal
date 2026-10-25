@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Consulta el estado de tus solicitudes de reserva de cabañas en Chiloé.">
+  <title>Mis reservas · Cabañas Chiloé</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="guest-page">
+  <header class="app-header guest-header">
+    <a class="brand-link" href="/cliente/" aria-label="Cabañas Chiloé, inicio">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <span><span class="eyebrow">Chiloé · Alojamiento</span><strong>Cabañas Chiloé</strong></span>
+    </a>
+    <nav class="header-actions" aria-label="Navegación">
+      <a class="text-button" href="/cliente/">Ver cabañas</a>
+      <a class="button button-secondary" href="/cuenta.html">Mi cuenta</a>
+    </nav>
+  </header>
+
+  <main class="guest-main">
+    <section class="results-section" aria-labelledby="reservations-heading">
+      <div class="section-heading">
+        <div><p class="eyebrow">Tu cuenta</p><h1 id="reservations-heading">Mis reservas</h1></div>
+      </div>
+      <p id="reservations-message" class="notice" role="status" aria-live="polite">Cargando tus reservas…</p>
+      <div id="reservations-list" class="reservation-list" aria-live="polite"></div>
+      <button id="load-more-reservations" class="button button-secondary" type="button" hidden>Mostrar más</button>
+    </section>
+  </main>
+
+  <footer class="guest-footer"><span>Chiloé · Chile</span><a href="/cliente/">Ver cabañas</a></footer>
+  <script type="module" src="/cliente/reservas.js"></script>
+</body>
+</html>

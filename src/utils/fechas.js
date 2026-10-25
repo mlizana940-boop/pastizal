@@ -1,6 +1,7 @@
 const { HttpError } = require("./httpError");
 
 const MAX_NOCHES = 30;
+const TIME_ZONE_CHILE = "America/Santiago";
 
 function parseIsoDate(value, fieldName) {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -11,6 +12,24 @@ function parseIsoDate(value, fieldName) {
     throw new HttpError(400, `${fieldName} no es una fecha válida.`);
   }
   return date;
+}
+
+function todayKeyInChile(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIME_ZONE_CHILE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function assertEntryDateNotPast(value, now = new Date()) {
+  parseIsoDate(value, "La fecha de entrada");
+  if (value < todayKeyInChile(now)) {
+    throw new HttpError(400, "La fecha de entrada no puede ser anterior a hoy.");
+  }
 }
 
 function buildNightKeys(fechaEntrada, fechaSalida) {
@@ -29,4 +48,4 @@ function buildNightKeys(fechaEntrada, fechaSalida) {
   });
 }
 
-module.exports = { buildNightKeys };
+module.exports = { assertEntryDateNotPast, buildNightKeys, todayKeyInChile };

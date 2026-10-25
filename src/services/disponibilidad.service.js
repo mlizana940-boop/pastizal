@@ -1,6 +1,6 @@
 const cabanaRepository = require("../repositories/cabana.repository");
 const reservaRepository = require("../repositories/reserva.repository");
-const { buildNightKeys } = require("../utils/fechas");
+const { assertEntryDateNotPast, buildNightKeys } = require("../utils/fechas");
 const { HttpError } = require("../utils/httpError");
 
 async function listAvailable({ fechaEntrada, fechaSalida, huespedes } = {}) {
@@ -18,6 +18,7 @@ async function listAvailable({ fechaEntrada, fechaSalida, huespedes } = {}) {
     }
   }
 
+  if (hasEntry) assertEntryDateNotPast(fechaEntrada);
   const nights = hasEntry ? buildNightKeys(fechaEntrada, fechaSalida) : null;
   const cabins = await cabanaRepository.list();
   const matchingCapacity = guestCount

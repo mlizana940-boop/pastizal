@@ -49,6 +49,14 @@ async function update(id, data) {
   return { ...previous, ...data, updatedAt: new Date().toISOString() };
 }
 
+async function updateImage(id, imagenUrl) {
+  const ref = collection.doc(id);
+  const snapshot = await ref.get();
+  if (!snapshot.exists) throw new HttpError(404, "No se encontró la cabaña.");
+  await ref.update({ imagenUrl, updatedAt: FieldValue.serverTimestamp() });
+  return toCabana(snapshot);
+}
+
 async function remove(id) {
   const ref = collection.doc(id);
   await db.runTransaction(async (transaction) => {
@@ -81,4 +89,4 @@ async function remove(id) {
   return { id, deleted: true };
 }
 
-module.exports = { create, findById, list, remove, update };
+module.exports = { create, findById, list, remove, update, updateImage };
