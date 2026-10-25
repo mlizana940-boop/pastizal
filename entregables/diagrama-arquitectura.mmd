@@ -1,0 +1,43 @@
+flowchart LR
+  subgraph Usuarios["Usuarios y navegador"]
+    C["Cliente<br/>Catálogo, disponibilidad<br/>Reserva y Mis reservas"]
+    A["Administrador<br/>Panel de gestión"]
+  end
+
+  subgraph VM["Máquina virtual Azure del equipo<br/>Nombre del recurso / configuración por confirmar"]
+    Static["Express sirve páginas<br/>HTML · CSS · JavaScript"]
+    API["API Node.js + Express<br/>Rutas · controladores"]
+    Authz["Middleware<br/>Verificación de token<br/>Permiso de administrador"]
+    Rules["Servicios y modelos<br/>Validación · disponibilidad<br/>Estados de reserva"]
+    Repo["Repositorios<br/>Firebase Admin SDK"]
+    Disk["Sistema de archivos de la VM<br/>UPLOADS_DIR<br/>Imágenes /uploads"]
+  end
+
+  FirebaseAuth["Firebase Authentication"]
+  Firestore["Cloud Firestore<br/>cabanas · reservas<br/>nochesOcupadas por cabaña"]
+
+  C <-->|GET páginas / respuesta| Static
+  A <-->|GET panel / respuesta| Static
+  C -->|"Registro / inicio de sesión"| FirebaseAuth
+  A -->|"Inicio de sesión"| FirebaseAuth
+  FirebaseAuth -->|"ID token"| C
+  FirebaseAuth -->|"ID token"| A
+  C <-->|Bearer token: catálogo, reserva, mis reservas| API
+  A <-->|Bearer token: gestión administrativa| API
+  API --> Authz --> Rules --> Repo
+  Repo <-->|"Lecturas y escrituras"| Firestore
+  API -->|"Carga JPG/PNG/WebP autorizada"| Disk
+  Disk -->|"Ruta servida por Express: /uploads/..."| C
+  Disk -->|"Ruta servida por Express: /uploads/..."| A
+
+  classDef actor fill:#f5f1e6,stroke:#375c47,color:#193a2b,stroke-width:1.5px;
+  classDef server fill:#e6efe8,stroke:#1e5a3e,color:#142f22,stroke-width:2px;
+  classDef data fill:#e8edf5,stroke:#415d83,color:#1e314a,stroke-width:2px;
+  classDef auth fill:#fff1d1,stroke:#9b6c18,color:#4a3615,stroke-width:2px;
+  class C,A actor;
+  class Static,API,Authz,Rules,Repo,Disk server;
+  class Firestore data;
+  class FirebaseAuth auth;
+
+
+
