@@ -62,6 +62,10 @@ En Firebase Authentication habilita el proveedor de correo y contraseña y crea 
 
 El administrador puede seleccionar una imagen JPG, PNG o WebP de hasta 3 MB; el formulario muestra una vista previa y sus dimensiones. Express valida y guarda el archivo en el servidor, y Firestore conserva su ruta pública (`/uploads/...`). En desarrollo se usa `storage/uploads`, que está excluida de Git. En Azure, define `UPLOADS_DIR` con la ruta absoluta de un disco persistente fuera de la carpeta del repositorio; no uses un disco temporal ni una ruta que el proceso de despliegue limpie. La API exige autenticación y permisos de administrador para cargar imágenes.
 
+## Validaciones de formularios
+
+El registro y el inicio de sesión usan Firebase Authentication: correo válido y contraseña de 6 a 128 caracteres; el registro confirma que ambas contraseñas coincidan. Las reservas validan nombre completo, correo asociado a la sesión, teléfono de 8 a 15 dígitos, fechas futuras y en orden, estadías de hasta 30 noches y huéspedes dentro de la capacidad. La administración valida nombre, precio entero de $1 a $10.000.000 CLP, capacidad de 1 a 30, descripción de hasta 1.000 caracteres, hasta 20 comodidades únicas y los formatos y tamaño de imagen. Las reglas principales se vuelven a validar en el servidor antes de guardar.
+
 Despliega las reglas e índices de Firestore desde el directorio del proyecto después de seleccionar el proyecto Firebase correcto:
 
 ```powershell

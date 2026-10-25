@@ -31,7 +31,7 @@
       <form id="search-form" class="search-form">
         <label>Entrada<input id="search-entry" name="fechaEntrada" type="date"></label>
         <label>Salida<input id="search-exit" name="fechaSalida" type="date"></label>
-        <label>Huéspedes<input id="search-guests" name="huespedes" type="number" min="1" max="30" value="2"></label>
+        <label>Huéspedes<input id="search-guests" name="huespedes" type="number" min="1" max="30" step="1" inputmode="numeric" value="2" required></label>
         <button class="button" type="submit">Buscar cabañas</button>
       </form>
     </section>
@@ -53,12 +53,22 @@
       <p id="selected-cabin" class="muted"></p>
       <form id="booking-form" class="cabin-form booking-form">
         <input id="booking-cabin-id" type="hidden">
-        <label>Nombre completo<input id="booking-name" name="nombre" autocomplete="name" minlength="2" maxlength="120" required></label>
-        <label>Correo de la cuenta<input id="booking-email" name="email" type="email" autocomplete="email" readonly required></label>
-        <label>Teléfono<input id="booking-phone" name="telefono" type="tel" autocomplete="tel" minlength="6" maxlength="30" required></label>
-        <label>Entrada<input id="booking-entry" name="fechaEntrada" type="date" required></label>
-        <label>Salida<input id="booking-exit" name="fechaSalida" type="date" required></label>
-        <label>Huéspedes<input id="booking-guests" name="huespedes" type="number" min="1" max="30" required></label>
+        <label>Nombre completo<input id="booking-name" name="nombre" autocomplete="name" minlength="2" maxlength="120" aria-describedby="booking-name-hint" required>
+          <small id="booking-name-hint" class="muted">De 2 a 120 caracteres; escribe tu nombre completo.</small>
+        </label>
+        <label>Correo de la cuenta<input id="booking-email" name="email" type="email" autocomplete="email" maxlength="254" readonly required></label>
+        <label>Teléfono<input id="booking-phone" name="telefono" type="tel" autocomplete="tel" inputmode="tel" minlength="8" maxlength="25" aria-describedby="booking-phone-hint" required>
+          <small id="booking-phone-hint" class="muted">Usa entre 8 y 15 dígitos; puedes incluir el código de país y separadores.</small>
+        </label>
+        <label>Entrada<input id="booking-entry" name="fechaEntrada" type="date" required>
+          <small class="muted">Desde hoy.</small>
+        </label>
+        <label>Salida<input id="booking-exit" name="fechaSalida" type="date" required>
+          <small class="muted">Después de la entrada; máximo 30 noches.</small>
+        </label>
+        <label>Huéspedes<input id="booking-guests" name="huespedes" type="number" min="1" max="30" step="1" inputmode="numeric" aria-describedby="booking-guests-hint" required>
+          <small id="booking-guests-hint" class="muted"></small>
+        </label>
         <div class="form-actions wide-field">
           <button id="submit-booking" class="button" type="submit">Enviar solicitud</button>
         </div>

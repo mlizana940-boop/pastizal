@@ -13,6 +13,8 @@ const message = document.querySelector("#account-message");
 const submitButton = document.querySelector("#account-submit");
 const emailInput = document.querySelector("#account-email");
 const passwordInput = document.querySelector("#account-password");
+const passwordConfirmInput = document.querySelector("#account-password-confirm");
+const passwordConfirmLabel = document.querySelector("#password-confirm-label");
 const passwordHint = document.querySelector("#password-hint");
 const loginModeButton = document.querySelector("#login-mode");
 const registerModeButton = document.querySelector("#register-mode");
@@ -52,6 +54,11 @@ function setMode(register) {
   isRegisterMode = register;
   passwordInput.autocomplete = register ? "new-password" : "current-password";
   passwordHint.hidden = !register;
+  passwordConfirmLabel.hidden = !register;
+  passwordConfirmInput.hidden = !register;
+  passwordConfirmInput.required = register;
+  passwordConfirmInput.value = "";
+  passwordConfirmInput.setCustomValidity("");
   document.querySelector("#account-heading").textContent = register ? "Crea tu cuenta" : "Inicia sesión";
   document.querySelector("#account-description").textContent = register
     ? "Regístrate para solicitar una reserva. También puedes usar esta cuenta para iniciar sesión."
@@ -62,6 +69,16 @@ function setMode(register) {
   loginModeButton.setAttribute("aria-pressed", String(!register));
   registerModeButton.setAttribute("aria-pressed", String(register));
   showMessage("");
+}
+
+function validatePasswordConfirmation() {
+  if (!isRegisterMode || !passwordConfirmInput.value) {
+    passwordConfirmInput.setCustomValidity("");
+    return;
+  }
+  passwordConfirmInput.setCustomValidity(
+    passwordConfirmInput.value === passwordInput.value ? "" : "Las contraseñas no coinciden."
+  );
 }
 
 function showAccountState(user) {
@@ -130,6 +147,7 @@ function authErrorMessage(error) {
     "auth/wrong-password": "Correo o contraseña incorrectos.",
     "auth/user-disabled": "Esta cuenta está deshabilitada. Contacta al administrador.",
     "auth/weak-password": "La contraseña debe tener al menos 6 caracteres.",
+    "auth/operation-not-allowed": "El registro con correo y contraseña no está habilitado.",
     "auth/too-many-requests": "Hubo demasiados intentos. Espera un momento e inténtalo otra vez."
   };
   return messages[error.code] || "No se pudo completar el acceso. Revisa los datos e inténtalo nuevamente.";
@@ -137,6 +155,9 @@ function authErrorMessage(error) {
 
 loginModeButton.addEventListener("click", () => setMode(false));
 registerModeButton.addEventListener("click", () => setMode(true));
+emailInput.addEventListener("blur", () => { emailInput.value = emailInput.value.trim(); });
+passwordConfirmInput.addEventListener("input", validatePasswordConfirmation);
+passwordInput.addEventListener("input", validatePasswordConfirmation);
 
 if (!firebaseConfigReady) {
   showMessage("La aplicación de Firebase no está configurada.", true);
@@ -168,6 +189,8 @@ if (!firebaseConfigReady) {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    validatePasswordConfirmation();
+    if (!form.reportValidity()) return;
     authFlowInProgress = true;
     submitButton.disabled = true;
     showMessage(isRegisterMode ? "Creando tu cuenta…" : "Iniciando sesión…");

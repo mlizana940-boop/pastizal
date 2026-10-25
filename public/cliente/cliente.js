@@ -29,25 +29,82 @@ function todayInChile() {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-function syncDateConstraints(entryInput, exitInput) {
+function addDaysToDateKey(value, days) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return "";
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) return "";
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function syncDateConstraints(entryInput, exitInput, optionalPair = false) {
   const today = todayInChile();
+  const entry = entryInput.value;
+  const exit = exitInput.value;
   entryInput.min = today;
-  if (entryInput.value && entryInput.value < today) {
-    entryInput.value = "";
-    exitInput.value = "";
+  exitInput.min = entry ? addDaysToDateKey(entry, 1) : today;
+  exitInput.max = entry ? addDaysToDateKey(entry, 30) : "";
+
+  let entryError = entry && entry < today ? "La entrada no puede ser anterior a hoy." : "";
+  let exitError = "";
+  if (optionalPair && Boolean(entry) !== Boolean(exit)) {
+    if (entry) exitError = "Indica la fecha de salida.";
+    else entryError = "Indica la fecha de entrada.";
+  } else if (entry && exit && exit <= entry) {
+    exitError = "La salida debe ser posterior a la entrada.";
+  } else if (entry && exit && exit > addDaysToDateKey(entry, 30)) {
+    exitError = "La estadía no puede superar 30 noches.";
+  } else if (exit && exit < today) {
+    exitError = "La salida no puede ser anterior a hoy.";
   }
-  exitInput.min = entryInput.value && entryInput.value >= today ? entryInput.value : today;
-  if (exitInput.value && exitInput.value < exitInput.min) exitInput.value = "";
+
+  entryInput.setCustomValidity(entryError);
+  exitInput.setCustomValidity(exitError);
 }
 
 const searchEntryInput = document.querySelector("#search-entry");
 const searchExitInput = document.querySelector("#search-exit");
 const bookingEntryInput = document.querySelector("#booking-entry");
 const bookingExitInput = document.querySelector("#booking-exit");
-searchEntryInput.addEventListener("input", () => syncDateConstraints(searchEntryInput, searchExitInput));
+searchEntryInput.addEventListener("input", () => syncDateConstraints(searchEntryInput, searchExitInput, true));
+searchExitInput.addEventListener("input", () => syncDateConstraints(searchEntryInput, searchExitInput, true));
 bookingEntryInput.addEventListener("input", () => syncDateConstraints(bookingEntryInput, bookingExitInput));
-syncDateConstraints(searchEntryInput, searchExitInput);
+bookingExitInput.addEventListener("input", () => syncDateConstraints(bookingEntryInput, bookingExitInput));
+syncDateConstraints(searchEntryInput, searchExitInput, true);
 syncDateConstraints(bookingEntryInput, bookingExitInput);
+
+const bookingNameInput = document.querySelector("#booking-name");
+const bookingPhoneInput = document.querySelector("#booking-phone");
+const bookingGuestsInput = document.querySelector("#booking-guests");
+const bookingGuestsHint = document.querySelector("#booking-guests-hint");
+const fullNamePattern = /^[\p{L}\p{M}]+(?:[ .'-’][\p{L}\p{M}]+)*$/u;
+
+function validateBookingName() {
+  const normalized = bookingNameInput.value.trim().replace(/\s+/g, " ");
+  const valid = normalized.length >= 2 && normalized.length <= 120 && fullNamePattern.test(normalized);
+  bookingNameInput.setCustomValidity(valid ? "" : "Ingresa un nombre de 2 a 120 caracteres, usando letras y separadores comunes.");
+}
+
+function validateBookingPhone() {
+  const compact = bookingPhoneInput.value.trim().replace(/[()\s.-]/g, "");
+  const valid = /^\+?\d{8,15}$/.test(compact);
+  bookingPhoneInput.setCustomValidity(valid ? "" : "Ingresa un teléfono con 8 a 15 dígitos; puedes incluir el código de país.");
+}
+
+function validateBookingGuests() {
+  if (!bookingGuestsInput.value) {
+    bookingGuestsInput.setCustomValidity("");
+    return;
+  }
+  const guests = Number(bookingGuestsInput.value);
+  const maximum = Number(bookingGuestsInput.max) || 30;
+  const valid = Number.isInteger(guests) && guests >= 1 && guests <= maximum;
+  bookingGuestsInput.setCustomValidity(valid ? "" : `La cantidad debe ser un entero entre 1 y ${maximum}, según la capacidad de esta cabaña.`);
+}
+
+bookingNameInput.addEventListener("input", validateBookingName);
+bookingPhoneInput.addEventListener("input", validateBookingPhone);
+bookingGuestsInput.addEventListener("input", validateBookingGuests);
 
 function readDraft() {
   try {
@@ -64,7 +121,7 @@ if (savedDraft) {
   document.querySelector("#search-entry").value = savedDraft.fechaEntrada || "";
   document.querySelector("#search-exit").value = savedDraft.fechaSalida || "";
   document.querySelector("#search-guests").value = savedDraft.huespedes || 2;
-  syncDateConstraints(searchEntryInput, searchExitInput);
+  syncDateConstraints(searchEntryInput, searchExitInput, true);
 }
 
 function renderCabins(items) {
@@ -194,7 +251,15 @@ function openBooking(draft, user = currentUser) {
   document.querySelector("#booking-entry").value = draft.fechaEntrada || "";
   document.querySelector("#booking-exit").value = draft.fechaSalida || "";
   syncDateConstraints(bookingEntryInput, bookingExitInput);
-  document.querySelector("#booking-guests").value = draft.huespedes || 2;
+  const selectedCabin = cabins.find((item) => item.id === draft.cabanaId);
+  const cabinCapacity = Number(selectedCabin?.capacidad ?? draft.capacidad);
+  bookingGuestsInput.max = String(Number.isInteger(cabinCapacity) && cabinCapacity >= 1 ? Math.min(30, cabinCapacity) : 30);
+  bookingGuestsInput.value = draft.huespedes || 2;
+  bookingGuestsHint.textContent = `Esta cabaña admite hasta ${bookingGuestsInput.max} huéspedes.`;
+  validateBookingGuests();
+  validateBookingName();
+  validateBookingPhone();
+  validateBookingGuests();
   showMessage(bookingMessage, "");
   bookingPanel.hidden = false;
   bookingPanel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -216,6 +281,7 @@ cabinsList.addEventListener("click", (event) => {
   const draft = {
     cabanaId: cabin.id,
     cabanaNombre: cabin.nombre,
+    capacidad: cabin.capacidad,
     fechaEntrada,
     fechaSalida,
     huespedes: Number(document.querySelector("#search-guests").value) || 1
@@ -237,6 +303,11 @@ bookingForm.addEventListener("submit", async (event) => {
     window.location.assign("/cuenta.html?next=%2Fcliente%2F");
     return;
   }
+
+  validateBookingName();
+  validateBookingPhone();
+  syncDateConstraints(bookingEntryInput, bookingExitInput);
+  if (!bookingForm.reportValidity()) return;
 
   const submitButton = document.querySelector("#submit-booking");
   submitButton.disabled = true;

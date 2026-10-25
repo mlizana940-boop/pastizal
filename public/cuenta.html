@@ -31,10 +31,13 @@
 
     <form id="account-form" class="stack-form">
       <label for="account-email">Correo electrónico</label>
-      <input id="account-email" name="email" type="email" autocomplete="username" required>
+      <input id="account-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+      <p class="field-hint">Usa un correo electrónico válido.</p>
       <label for="account-password">Contraseña</label>
-      <input id="account-password" name="password" type="password" autocomplete="current-password" minlength="6" required>
-      <p id="password-hint" class="field-hint" hidden>Usa al menos 6 caracteres.</p>
+      <input id="account-password" name="password" type="password" autocomplete="current-password" minlength="6" maxlength="128" aria-describedby="password-hint" required>
+      <p id="password-hint" class="field-hint" hidden>Usa entre 6 y 128 caracteres y confirma la misma contraseña.</p>
+      <label id="password-confirm-label" for="account-password-confirm" hidden>Confirmar contraseña</label>
+      <input id="account-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" minlength="6" maxlength="128" hidden>
       <button id="account-submit" class="button" type="submit">Iniciar sesión</button>
     </form>
     <p id="account-message" class="notice" role="status" aria-live="polite"></p>

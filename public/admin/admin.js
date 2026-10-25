@@ -11,7 +11,13 @@ const cabinImageUrlInput = document.querySelector("#cabin-image-url");
 const cabinImagePreview = document.querySelector("#cabin-image-preview");
 const cabinImagePreviewImage = document.querySelector("#cabin-image-preview-img");
 const cabinImageDetails = document.querySelector("#cabin-image-details");
+const cabinNameInput = document.querySelector("#cabin-name");
+const cabinPriceInput = document.querySelector("#cabin-price");
+const cabinAmenitiesInput = document.querySelector("#cabin-amenities");
 const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024;
+const MAX_CABIN_PRICE_CLP = 10_000_000;
+const MAX_AMENITIES = 20;
+const MAX_AMENITY_LENGTH = 40;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 let auth;
 let currentUser = null;
@@ -114,6 +120,38 @@ function handleCabinImageSelection() {
   previewObjectUrl = URL.createObjectURL(file);
   showCabinImagePreview(previewObjectUrl, `Imagen seleccionada · ${(file.size / 1024).toFixed(0)} KB`);
   showMessage("");
+}
+
+function validateCabinName() {
+  const value = cabinNameInput.value.trim();
+  const valid = value.length >= 2 && value.length <= 100 && !/[\u0000-\u001f\u007f]/.test(value);
+  cabinNameInput.setCustomValidity(valid ? "" : "El nombre debe tener entre 2 y 100 caracteres.");
+}
+
+function validateCabinPrice() {
+  if (!cabinPriceInput.value) {
+    cabinPriceInput.setCustomValidity("");
+    return;
+  }
+  const price = Number(cabinPriceInput.value);
+  const valid = Number.isSafeInteger(price) && price >= 1 && price <= MAX_CABIN_PRICE_CLP;
+  cabinPriceInput.setCustomValidity(valid ? "" : `Ingresa un precio entero entre $1 y $${MAX_CABIN_PRICE_CLP.toLocaleString("es-CL")} CLP.`);
+}
+
+function validateCabinAmenities() {
+  const rawItems = cabinAmenitiesInput.value.split(",");
+  const items = rawItems.map((item) => item.trim()).filter(Boolean);
+  let error = "";
+  if (cabinAmenitiesInput.value.trim() && rawItems.some((item) => !item.trim())) {
+    error = "Revisa las comas: no dejes comodidades vacías.";
+  } else if (items.length > MAX_AMENITIES) {
+    error = `Ingresa como máximo ${MAX_AMENITIES} comodidades.`;
+  } else if (items.some((item) => item.length < 2 || item.length > MAX_AMENITY_LENGTH)) {
+    error = `Cada comodidad debe tener entre 2 y ${MAX_AMENITY_LENGTH} caracteres.`;
+  } else if (new Set(items.map((item) => item.toLocaleLowerCase("es-CL"))).size !== items.length) {
+    error = "No repitas la misma comodidad.";
+  }
+  cabinAmenitiesInput.setCustomValidity(error);
 }
 
 function renderCabins() {
@@ -243,6 +281,9 @@ async function loadData() {
 function resetCabinForm() {
   clearCabinImagePreview();
   cabinForm.reset();
+  cabinNameInput.setCustomValidity("");
+  cabinPriceInput.setCustomValidity("");
+  cabinAmenitiesInput.setCustomValidity("");
   document.querySelector("#cabin-id").value = "";
   cabinImageUrlInput.value = "";
   document.querySelector("#save-cabin").textContent = "Guardar cabaña";
@@ -251,6 +292,10 @@ function resetCabinForm() {
 
 cabinForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  validateCabinName();
+  validateCabinPrice();
+  validateCabinAmenities();
+  if (!cabinForm.reportValidity()) return;
   const id = document.querySelector("#cabin-id").value;
   const imageFile = cabinImageInput.files?.[0] || null;
   const saveButton = document.querySelector("#save-cabin");
@@ -298,6 +343,9 @@ cabinForm.addEventListener("submit", async (event) => {
 });
 
 cabinImageInput.addEventListener("change", handleCabinImageSelection);
+cabinNameInput.addEventListener("input", validateCabinName);
+cabinPriceInput.addEventListener("input", validateCabinPrice);
+cabinAmenitiesInput.addEventListener("input", validateCabinAmenities);
 
 document.querySelector("#cancel-edit").addEventListener("click", resetCabinForm);
 cabinsTable.addEventListener("click", async (event) => {
@@ -314,6 +362,9 @@ cabinsTable.addEventListener("click", async (event) => {
     document.querySelector("#cabin-description").value = cabin.descripcion || "";
     cabinImageUrlInput.value = cabin.imagenUrl || "";
     document.querySelector("#cabin-amenities").value = (cabin.comodidades || []).join(", ");
+    validateCabinName();
+    validateCabinPrice();
+    validateCabinAmenities();
     document.querySelector("#save-cabin").textContent = "Guardar cambios";
     document.querySelector("#cancel-edit").hidden = false;
     showCurrentCabinImage();
