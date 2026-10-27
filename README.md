@@ -13,6 +13,12 @@ Cliente o administrador ⇄ Firebase Authentication → token verificado por la 
 
 El navegador no escribe en Firestore. La API recibe las solicitudes, valida los datos y aplica las reglas de negocio antes de usar Firebase Admin SDK. Las carpetas `controllers`, `services`, `models` y `repositories` ordenan el código del servidor; no representan una arquitectura MVC que el equipo deba presentar.
 
+### Despliegue en Azure
+
+![Diagrama de despliegue de la aplicación en Azure y Firebase](entregables/arquitectura-azure.png)
+
+> **Nota:** El recuento de commits del gráfico corresponde al momento en que se creó. En la versión actual, las imágenes se guardan como URLs públicas directas en Firestore, según la sección «Imágenes de cabañas»; el disco dibujado no implica que se use para almacenar imágenes.
+
 ## Estructura
 
 ```text
