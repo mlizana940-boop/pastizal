@@ -1,125 +1,139 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="940" viewBox="0 0 1440 940" role="img" aria-labelledby="title desc">
-  <title id="title">Arquitectura cliente-servidor de Reservas de Cabañas en Chiloé</title>
-  <desc id="desc">Los navegadores cargan las interfaces desde Express. Firebase Authentication emite ID tokens que Express valida. La API aplica reglas y accede a Firestore. Firestore conserva las URLs HTTPS públicas de las imágenes y los navegadores las cargan directamente desde los sitios externos.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1060" viewBox="0 0 1440 1060" role="img" aria-labelledby="title desc">
+  <title id="title">Arquitectura cliente-servidor del sistema de reservas de cabañas en Chiloé</title>
+  <desc id="desc">Un navegador con vistas de cliente y administrador se comunica con una aplicación Express en una máquina virtual Azure. Express contiene rutas, controladores, middleware, servicios, modelos y repositorios. Firebase Authentication gestiona las cuentas; Cloud Firestore guarda los datos. El navegador carga las imágenes directamente desde URLs HTTPS públicas externas.</desc>
   <defs>
-    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1 L11 6 L1 11 Z" fill="#315b42"/></marker>
-    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1 L11 6 L1 11 Z" fill="#496589"/></marker>
-    <marker id="arrow-gold" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1 L11 6 L1 11 Z" fill="#946b1b"/></marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#315b42"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#496589"/>
+    </marker>
+    <marker id="arrow-gold" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto-start-reverse" markerUnits="strokeWidth">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#946b1b"/>
+    </marker>
     <style>
-      text { font-family: Arial, sans-serif; fill:#18352a; }
-      .title { font-size:32px; font-weight:700; }
-      .subtitle { font-size:16px; fill:#51645a; }
-      .group-title { font-size:19px; font-weight:700; }
-      .node-title { font-size:18px; font-weight:700; }
-      .body { font-size:15px; fill:#33483c; }
-      .small { font-size:13px; fill:#56685d; }
-      .edge-label { font-size:13px; font-weight:600; fill:#344a3c; }
-      .edge { fill:none; stroke:#315b42; stroke-width:2.5; marker-end:url(#arrow-green); }
-      .edge-blue { fill:none; stroke:#496589; stroke-width:2.5; marker-end:url(#arrow-blue); }
-      .edge-gold { fill:none; stroke:#946b1b; stroke-width:2.5; marker-end:url(#arrow-gold); }
-      .node { fill:#fffefa; stroke:#547260; stroke-width:1.7; rx:13; }
-      .node-blue { fill:#edf2f8; stroke:#496589; stroke-width:1.8; rx:13; }
-      .node-gold { fill:#fff4d9; stroke:#946b1b; stroke-width:1.8; rx:13; }
-      .vm { fill:#eef3ed; stroke:#315b42; stroke-width:2.5; rx:22; }
-      .soft { fill:#f8f6ef; }
+      text { font-family: Arial, sans-serif; fill: #18352a; }
+      .title { font-size: 32px; font-weight: 700; }
+      .subtitle { font-size: 16px; fill: #51645a; }
+      .section { font-size: 19px; font-weight: 700; }
+      .node-title { font-size: 17px; font-weight: 700; }
+      .body { font-size: 14px; fill: #33483c; }
+      .small { font-size: 12px; fill: #56685d; }
+      .edge-label { font-size: 12px; font-weight: 700; fill: #344a3c; }
+      .edge-green { fill: none; stroke: #315b42; stroke-width: 2.4; marker-start: url(#arrow-green); marker-end: url(#arrow-green); }
+      .edge-blue { fill: none; stroke: #496589; stroke-width: 2.4; marker-start: url(#arrow-blue); marker-end: url(#arrow-blue); }
+      .edge-gold { fill: none; stroke: #946b1b; stroke-width: 2.4; marker-start: url(#arrow-gold); marker-end: url(#arrow-gold); }
+      .edge-one-gold { fill: none; stroke: #946b1b; stroke-width: 2.4; marker-end: url(#arrow-gold); }
+      .edge-one-green { fill: none; stroke: #315b42; stroke-width: 2.4; marker-end: url(#arrow-green); }
+      .node { fill: #fffefa; stroke: #547260; stroke-width: 1.7; rx: 13; }
+      .node-blue { fill: #edf2f8; stroke: #496589; stroke-width: 1.8; rx: 13; }
+      .node-gold { fill: #fff4d9; stroke: #946b1b; stroke-width: 1.8; rx: 13; }
+      .zone { fill: #eef3ed; stroke: #315b42; stroke-width: 2.2; rx: 20; }
+      .soft { fill: #f8f6ef; stroke: #c9d4c9; stroke-width: 1.4; rx: 17; }
+      .tag { fill: #fffefa; stroke: #d6ded5; stroke-width: 1; rx: 10; }
+      .note { fill: #fffefa; stroke: #d7ddd4; stroke-width: 1.2; rx: 12; }
     </style>
   </defs>
-  <rect width="1440" height="940" fill="#f8f6ef"/>
-  <text x="55" y="58" class="title">Reservas de cabañas en Chiloé</text>
-  <text x="55" y="88" class="subtitle">Arquitectura principal: cliente-servidor · Flujo contrastado con el código del repositorio</text>
 
-  <rect x="48" y="125" width="258" height="235" rx="18" class="soft" stroke="#c9d4c9"/>
-  <text x="70" y="158" class="group-title">Navegador</text>
-  <rect x="70" y="178" width="215" height="72" class="node"/>
-  <text x="88" y="207" class="node-title">Cliente</text>
-  <text x="88" y="230" class="body">Catálogo · búsqueda · reserva</text>
-  <rect x="70" y="270" width="215" height="67" class="node"/>
-  <text x="88" y="297" class="node-title">Administrador</text>
-  <text x="88" y="321" class="body">Panel · cabañas · solicitudes</text>
+  <rect width="1440" height="1060" fill="#f8f6ef"/>
+  <text x="50" y="58" class="title">Reservas de cabañas en Chiloé</text>
+  <text x="50" y="88" class="subtitle">Arquitectura principal: cliente-servidor · Backend organizado por capas</text>
 
-  <rect x="360" y="122" width="786" height="590" class="vm"/>
-  <text x="390" y="158" class="group-title">Máquina virtual Azure del equipo</text>
-  <text x="390" y="181" class="small">Node.js + Express · configuración exacta del recurso a completar por el responsable Azure</text>
+  <!-- Navegador -->
+  <rect x="40" y="220" width="340" height="220" class="soft"/>
+  <text x="65" y="253" class="section">Navegador</text>
+  <rect x="65" y="270" width="290" height="145" class="node"/>
+  <text x="85" y="300" class="node-title">Cliente</text>
+  <text x="85" y="323" class="body">Catálogo · disponibilidad · reservas</text>
+  <text x="85" y="344" class="body">Mis reservas</text>
+  <line x1="85" y1="357" x2="335" y2="357" stroke="#d7ddd4" stroke-width="1.2"/>
+  <text x="85" y="382" class="node-title">Administrador</text>
+  <text x="85" y="403" class="body">Cabañas · gestión de solicitudes</text>
 
-  <rect x="394" y="215" width="214" height="92" class="node"/>
-  <text x="415" y="245" class="node-title">Vistas web</text>
-  <text x="415" y="269" class="body">public/cliente</text>
-  <text x="415" y="290" class="body">public/admin · CSS · JS</text>
+  <!-- Aplicación en Azure -->
+  <rect x="400" y="190" width="600" height="570" class="zone"/>
+  <text x="430" y="230" class="section">Máquina virtual Azure</text>
+  <text x="430" y="252" class="small">Node.js + Express · aplicación web y API</text>
 
-  <rect x="655" y="215" width="220" height="92" class="node"/>
-  <text x="676" y="245" class="node-title">API Express</text>
-  <text x="676" y="269" class="body">Rutas y controladores</text>
-  <text x="676" y="290" class="body">/api y /api/admin</text>
+  <rect x="440" y="285" width="520" height="130" class="node"/>
+  <text x="465" y="320" class="node-title">Aplicación Express</text>
+  <text x="465" y="347" class="body">Sirve páginas HTML, CSS y JavaScript</text>
+  <text x="465" y="370" class="body">API REST pública y protegida</text>
+  <text x="465" y="393" class="small">Catálogo · reservas · administración</text>
 
-  <rect x="924" y="215" width="190" height="92" class="node"/>
-  <text x="944" y="245" class="node-title">Middleware</text>
-  <text x="944" y="269" class="body">Verifica ID token</text>
-  <text x="944" y="290" class="body">y rol administrador</text>
+  <rect x="440" y="445" width="520" height="60" class="node"/>
+  <text x="465" y="481" class="node-title">Rutas y controladores</text>
 
-  <rect x="655" y="356" width="220" height="105" class="node"/>
-  <text x="676" y="387" class="node-title">Servicios y modelos</text>
-  <text x="676" y="411" class="body">Validación de datos</text>
-  <text x="676" y="432" class="body">Disponibilidad y estados</text>
-  <text x="676" y="451" class="body">Reglas de negocio</text>
+  <rect x="440" y="525" width="520" height="60" class="node-gold"/>
+  <text x="465" y="551" class="node-title">Middleware de autenticación y autorización</text>
+  <text x="465" y="573" class="small">Verifica ID token · restringe acciones al administrador</text>
 
-  <rect x="924" y="356" width="190" height="105" class="node-blue"/>
-  <text x="944" y="387" class="node-title">Repositorios</text>
-  <text x="944" y="411" class="body">Firebase Admin SDK</text>
-  <text x="944" y="432" class="body">Acceso a Firestore</text>
+  <rect x="440" y="605" width="520" height="60" class="node"/>
+  <text x="465" y="631" class="node-title">Servicios y modelos</text>
+  <text x="465" y="653" class="small">Validación · disponibilidad · estados de reserva</text>
 
-  <rect x="1190" y="590" width="205" height="120" class="node-gold"/>
-  <text x="1211" y="625" class="node-title">Sitio externo</text>
-  <text x="1211" y="652" class="body">URL HTTPS pública</text>
-  <text x="1211" y="677" class="small">Aloja los archivos</text>
+  <rect x="440" y="685" width="520" height="60" class="node-blue"/>
+  <text x="465" y="721" class="node-title">Repositorios · Firebase Admin SDK</text>
 
-  <rect x="1190" y="386" width="205" height="152" class="node-blue"/>
-  <text x="1211" y="420" class="node-title">Cloud Firestore</text>
-  <text x="1211" y="447" class="body">cabanas · imagenUrl HTTPS</text>
-  <text x="1211" y="470" class="body">reservas</text>
-  <text x="1211" y="493" class="body">nochesOcupadas</text>
-  <text x="1211" y="518" class="small">Bloqueo por cabaña y fecha</text>
+  <!-- Servicios externos -->
+  <rect x="1040" y="220" width="360" height="220" class="soft"/>
+  <text x="1065" y="253" class="section">Firebase / Google Cloud</text>
+  <rect x="1065" y="270" width="310" height="145" class="node-gold"/>
+  <text x="1085" y="304" class="node-title">Firebase Authentication</text>
+  <text x="1085" y="332" class="body">Cuentas de cliente y administrador</text>
+  <text x="1085" y="355" class="body">Emite ID tokens al navegador</text>
+  <text x="1085" y="385" class="small">Servicio de Firebase, no de Azure</text>
 
-  <rect x="1190" y="150" width="205" height="120" class="node-gold"/>
-  <text x="1211" y="184" class="node-title">Firebase Authentication</text>
-  <text x="1211" y="211" class="body">Cuentas de cliente/admin</text>
-  <text x="1211" y="234" class="body">Emite ID tokens</text>
-  <text x="1211" y="256" class="small">No es un servicio Azure</text>
+  <rect x="1040" y="555" width="360" height="265" class="soft"/>
+  <text x="1065" y="588" class="section">Persistencia Firebase</text>
+  <rect x="1065" y="630" width="310" height="170" class="node-blue"/>
+  <text x="1085" y="665" class="node-title">Cloud Firestore</text>
+  <text x="1085" y="693" class="body">cabanas · imagenUrl HTTPS</text>
+  <text x="1085" y="719" class="body">reservas</text>
+  <text x="1085" y="745" class="body">nochesOcupadas por cabaña y fecha</text>
+  <text x="1085" y="775" class="small">El navegador no accede directamente</text>
 
-  <path d="M285 205 H394" class="edge" marker-start="url(#arrow-green)"/>
-  
-  <path d="M285 299 H350 V262 H394" class="edge" marker-start="url(#arrow-green)"/>
-  <text x="309" y="324" class="edge-label">Acceso al panel</text>
+  <!-- Alojamiento externo de imágenes -->
+  <rect x="65" y="625" width="290" height="130" class="node-gold"/>
+  <text x="85" y="658" class="node-title">Sitio externo de imágenes</text>
+  <text x="85" y="686" class="body">URL HTTPS pública y directa</text>
+  <text x="85" y="714" class="small">El archivo no se guarda en la VM</text>
 
-  <path d="M306 340 H628 V261 H655" class="edge" marker-start="url(#arrow-green)"/>
-  <text x="430" y="316" class="edge-label">Catálogo público · Bearer en reserva, Mis reservas y admin · URL HTTPS</text>
-  
-  
+  <!-- Flechas sin cruces -->
+  <path d="M355 342 H440" class="edge-green"/>
+  <rect x="365" y="315" width="65" height="22" class="tag"/>
+  <text x="377" y="330" class="edge-label">HTTP(S)</text>
 
-  <path d="M608 261 H655" class="edge"/>
-  <path d="M875 261 H924" class="edge"/>
-  <path d="M1019 307 V356" class="edge"/>
-  <path d="M875 408 H924" class="edge"/>
-  <path d="M1114 408 H1190" class="edge-blue"/>
-  <text x="1200" y="558" class="edge-label">Lecturas y escrituras</text>
+  <path d="M205 270 V150 H1220 V270" class="edge-gold"/>
+  <rect x="520" y="136" width="385" height="27" class="tag"/>
+  <text x="540" y="154" class="edge-label">Registro / inicio de sesión · emisión de ID token</text>
 
-  <path d="M306 236 H340 V108 H1165 V210 H1190" class="edge-gold" marker-start="url(#arrow-gold)"/>
-  
-  
-  
+  <path d="M700 415 V445" class="edge-one-green"/>
+  <path d="M700 505 V525" class="edge-one-green"/>
+  <path d="M700 585 V605" class="edge-one-green"/>
+  <path d="M700 665 V685" class="edge-one-green"/>
 
-  <path d="M285 299 H330 V735 H1165 V650 H1190" class="edge-gold"/>
-  <text x="470" y="729" class="edge-label">La vista previa y el catálogo cargan la imagen desde la URL</text>
+  <path d="M960 715 H1065" class="edge-blue"/>
+  <rect x="974" y="687" width="78" height="22" class="tag"/>
+  <text x="988" y="702" class="edge-label">Lecturas</text>
 
-  <rect x="48" y="770" width="1347" height="125" rx="18" fill="#fffefa" stroke="#d7ddd4"/>
-  <text x="72" y="808" class="group-title">Reglas clave del flujo</text>
-  <text x="72" y="839" class="body">• La API vuelve a validar fechas, huéspedes y capacidad antes de guardar.</text>
-  <text x="72" y="864" class="body">• Una transacción crea la reserva pendiente y bloquea cada noche; rechazar o cancelar libera los bloqueos.</text>
-  <text x="790" y="839" class="body">• Firestore bloquea el acceso directo desde el navegador.</text>
-  <text x="790" y="864" class="body">• Firestore guarda la URL; el archivo permanece alojado externamente.</text>
+  <path d="M205 415 V625" class="edge-one-gold"/>
+  <rect x="215" y="501" width="105" height="24" class="tag"/>
+  <text x="226" y="517" class="edge-label">Carga de imagen</text>
+
+  <!-- Notas de implementación -->
+  <rect x="40" y="840" width="1360" height="180" class="soft"/>
+  <text x="65" y="875" class="section">Reglas clave del flujo</text>
+
+  <rect x="65" y="895" width="625" height="48" class="note"/>
+  <text x="85" y="925" class="body">Transacción: crea la solicitud y bloquea cada noche solicitada.</text>
+
+  <rect x="715" y="895" width="650" height="48" class="note"/>
+  <text x="735" y="925" class="body">Acceso: Firestore deniega lectura y escritura directas desde el navegador.</text>
+
+  <rect x="65" y="955" width="625" height="48" class="note"/>
+  <text x="85" y="985" class="body">Rechazar o cancelar una solicitud libera sus noches ocupadas.</text>
+
+  <rect x="715" y="955" width="650" height="48" class="note"/>
+  <text x="735" y="985" class="body">Firestore conserva la URL; el navegador carga la imagen externamente.</text>
 </svg>
-
-
-
-
-
-
