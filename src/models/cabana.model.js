@@ -12,9 +12,6 @@ function parseInteger(value) {
 
 function validateCabanaImageUrl(imagenUrl) {
   if (!imagenUrl) return true;
-  const isManagedImage = /^\/uploads\/[A-Za-z0-9_-]{1,150}\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\.(?:jpg|png|webp)$/i.test(imagenUrl);
-  if (isManagedImage) return true;
-
   try {
     const url = new URL(imagenUrl);
     return url.protocol === "https:" && Boolean(url.hostname) && !url.username && !url.password;
@@ -62,7 +59,7 @@ function validateCabana(input = {}) {
     throw new HttpError(400, "La descripción no puede superar los 1000 caracteres.");
   }
   if (imagenUrl === null || imagenUrl.length > 2048 || !validateCabanaImageUrl(imagenUrl)) {
-    throw new HttpError(400, "La imagen debe usar una URL HTTPS válida o una imagen cargada en el servidor.");
+    throw new HttpError(400, "La imagen debe usar una URL HTTPS pública válida.");
   }
   if (comodidades.length > MAX_AMENITIES) {
     throw new HttpError(400, `Una cabaña puede tener hasta ${MAX_AMENITIES} comodidades.`);

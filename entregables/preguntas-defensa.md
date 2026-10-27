@@ -24,11 +24,11 @@ El cliente elige una cabaña, fechas y huéspedes. Tras iniciar sesión, el nave
 
 ## 6. ¿Qué ventajas y limitaciones presenta en mantenimiento, seguridad y rendimiento?
 
-La API centraliza reglas y permisos; la organización por capas permite ubicar el código; la transacción protege el proceso de reserva frente a conflictos entre solicitudes simultáneas. Como límites, Express se opera en una VM, las imágenes se mantienen en disco del servidor y requieren persistencia y respaldo, y Firestore requiere índices y monitoreo de uso. En seguridad, Firebase Admin SDK usa credenciales privilegiadas, por eso las rutas y credenciales deben protegerse en el servidor.
+La API centraliza reglas y permisos; la organización por capas permite ubicar el código; la transacción protege el proceso de reserva frente a conflictos entre solicitudes simultáneas. Como límites, Express se opera en una VM, las imágenes dependen de URLs HTTPS públicas alojadas externamente y Firestore requiere índices y monitoreo de uso. En seguridad, Firebase Admin SDK usa credenciales privilegiadas, por eso las rutas y credenciales deben protegerse en el servidor.
 
 ## 7. ¿Qué cambiaría si la aplicación pasara de 100 a 10.000 usuarios?
 
-Primero mediríamos el cuello de botella. Mantendríamos la API sin estado de sesión local, ejecutaríamos varias instancias detrás de un balanceador o moveríamos la aplicación a un servicio administrado apropiado, usaríamos monitoreo y límites de consumo, revisaríamos índices y consultas de Firestore y moveríamos imágenes a almacenamiento de objetos. También automatizaríamos pruebas de concurrencia. No afirmamos haber probado ese volumen; son medidas de evolución.
+Primero mediríamos el cuello de botella. Mantendríamos la API sin estado de sesión local, ejecutaríamos varias instancias detrás de un balanceador o moveríamos la aplicación a un servicio administrado apropiado, usaríamos monitoreo y límites de consumo, revisaríamos índices y consultas de Firestore y evaluaríamos almacenamiento de objetos si se necesita administrar las imágenes. También automatizaríamos pruebas de concurrencia. No afirmamos haber probado ese volumen; son medidas de evolución.
 
 ## 8. ¿Qué servicios de Azure utilizaron y por qué?
 
@@ -36,7 +36,7 @@ La aplicación se desplegó en la máquina virtual Azure acordada por el equipo,
 
 ## 9. ¿Qué parte de la arquitectura cambiarían ante un nuevo requerimiento?
 
-Depende del requerimiento. Para pagos, incorporaríamos una integración de pago detrás de la API y definiríamos estados de pago sin exponer credenciales al navegador. Para avisos automáticos, agregaríamos un servicio de notificaciones y eventos de cambios de estado. Para más imágenes, migraríamos el almacenamiento del disco a un servicio de objetos. Procuraríamos conservar las reglas de reserva en el backend.
+Depende del requerimiento. Para pagos, incorporaríamos una integración de pago detrás de la API y definiríamos estados de pago sin exponer credenciales al navegador. Para avisos automáticos, agregaríamos un servicio de notificaciones y eventos de cambios de estado. Si necesitamos controlar los archivos de imagen, incorporaríamos almacenamiento de objetos y migraríamos las URLs guardadas. Procuraríamos conservar las reglas de reserva en el backend.
 
 ## Preguntas de apoyo del equipo
 
@@ -49,8 +49,9 @@ El repositorio de reservas ejecuta una transacción: comprueba cada documento di
 **¿Qué ocurre cuando se rechaza o cancela una solicitud?**  
 La transacción que cambia el estado elimina los bloqueos asociados a esa reserva. Las noches dejan de estar ocupadas para futuras solicitudes.
 
-**¿Dónde se guardan las imágenes?**  
-Express valida imágenes JPG, PNG o WebP de hasta 3 MB y las guarda en el directorio configurado. Firestore guarda la ruta. En la VM, UPLOADS_DIR debe apuntar a almacenamiento persistente y respaldado.
+**¿Cómo se gestionan las imágenes?**
+
+El administrador pega una URL HTTPS pública en el panel. El servidor valida el formato de la URL y Firestore guarda ese valor en la cabaña. El navegador carga la imagen desde el sitio externo; la aplicación no recibe ni almacena el archivo.
 
 **¿Qué información de usuarios guardan en Firestore?**  
 Firebase Authentication mantiene las cuentas. Cada reserva conserva el UID autenticado y los datos necesarios para gestionarla. No se crea una colección aparte de sesiones activas.
@@ -60,4 +61,4 @@ Las credenciales administrativas se configuran en variables de entorno del servi
 
 ## Cierre sugerido
 
-La solución cubre el flujo principal de consulta, solicitud y gestión de reservas. La arquitectura cliente-servidor mantiene las reglas en el backend y conecta las interfaces con Firestore. Reconocemos límites en la operación de la VM y el almacenamiento de imágenes, y proponemos resolverlos según presupuesto y crecimiento.
+La solución cubre el flujo principal de consulta, solicitud y gestión de reservas. La arquitectura cliente-servidor mantiene las reglas en el backend y conecta las interfaces con Firestore. Reconocemos los límites de operar la VM y depender de URLs externas para las imágenes; proponemos evaluar almacenamiento administrado según presupuesto y crecimiento.

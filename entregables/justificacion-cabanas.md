@@ -19,7 +19,7 @@ El MVP permite consultar cabañas, filtrar por fechas y cantidad de huéspedes, 
 3. Solicitar una reserva con cuenta autenticada, datos de contacto, fechas y cantidad de huéspedes.
 4. Mostrar al cliente sus solicitudes y estados.
 5. Permitir al administrador crear, consultar, editar y eliminar cabañas, y cambiar el estado de las reservas.
-6. Cargar una imagen de cabaña desde el panel de administración.
+6. Registrar una URL HTTPS pública para la imagen de cada cabaña desde el panel de administración y mostrar su vista previa.
 7. Persistir cabañas, reservas y noches ocupadas.
 
 ### No funcionales
@@ -48,6 +48,8 @@ Se escogió **cliente-servidor** porque el proyecto tiene dos tipos de usuarios,
 
 Las carpetas del servidor separan responsabilidades: las rutas describen los endpoints, los controladores coordinan entrada y respuesta, los servicios aplican reglas, los modelos validan y normalizan datos, y los repositorios consultan Firestore. Esta organización por capas es una forma de implementar el backend; la arquitectura general que se presenta es cliente-servidor.
 
+Las imágenes se registran mediante URLs HTTPS públicas. El panel permite previsualizarlas y Firestore conserva la URL; el navegador carga el archivo desde el sitio externo, sin que la aplicación lo almacene.
+
 ## Recorrido de una reserva
 
 1. El visitante consulta el catálogo y, si quiere reservar, selecciona fechas y huéspedes.
@@ -69,14 +71,14 @@ Las carpetas del servidor separan responsabilidades: las rutas describen los end
 ## Limitaciones
 
 - Express se ejecuta como una aplicación central en una VM; el equipo administra su proceso, configuración, actualización y monitoreo.
-- Los datos están en Firestore, pero las imágenes se guardan en el disco del servidor. En Azure, el directorio configurado mediante UPLOADS_DIR debe residir en almacenamiento persistente y contar con respaldo; de lo contrario, una recreación de la VM podría perder imágenes.
+- Las imágenes dependen de URLs públicas alojadas por terceros. Si una URL cambia, requiere iniciar sesión o el sitio deja de estar disponible, la imagen no se verá en la aplicación. El sistema no administra los archivos ni puede garantizar su tamaño, dimensiones o permanencia.
 - Las consultas de Firestore dependen de índices y de los límites y costos vigentes del servicio.
 - Las solicitudes pendientes bloquean las noches hasta que el administrador las gestione. El panel avisa cuando hay pendientes con más de 24 horas, pero no las cancela automáticamente.
 - El MVP no incluye pagos, notificaciones automáticas al cliente ni administración de roles desde una interfaz.
 
 ## Mejoras propuestas
 
-1. Migrar las imágenes a almacenamiento de objetos con respaldo y acceso controlado cuando el presupuesto y la arquitectura de despliegue lo permitan.
+1. Integrar almacenamiento de objetos administrado si se necesita controlar la disponibilidad, el tamaño y la permanencia de las imágenes.
 2. Definir una política de expiración para solicitudes pendientes y avisar al cliente y al administrador sobre cambios de estado.
 3. Añadir pruebas automatizadas para validaciones, transiciones de estado y concurrencia de reservas.
 4. Incorporar métricas, registros y alertas de disponibilidad de la aplicación.
@@ -85,4 +87,4 @@ Las carpetas del servidor separan responsabilidades: las rutas describen los end
 
 ## Conclusión
 
-Cliente-servidor se ajusta al MVP porque separa la interfaz de un backend que concentra reglas, autenticación, permisos y persistencia. La arquitectura resuelve el flujo principal y deja puntos de evolución claros. Antes de cerrar la entrega se debe añadir el inventario exacto de recursos Azure y confirmar la persistencia y respaldo del disco usado para imágenes.
+Cliente-servidor se ajusta al MVP porque separa la interfaz de un backend que concentra reglas, autenticación, permisos y persistencia. La arquitectura resuelve el flujo principal y deja puntos de evolución claros. Las imágenes se gestionan mediante URLs HTTPS públicas; el equipo puede integrar almacenamiento propio más adelante si necesita controlar su disponibilidad y conservación.

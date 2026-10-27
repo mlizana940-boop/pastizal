@@ -89,9 +89,9 @@ td { min-width: 105px; }
 .cabins-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; margin-top: 1rem; }
 .cabin-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); box-shadow: 0 5px 20px rgba(31, 43, 41, .04); }
 .cabin-image, .cabin-image-fallback { width: 100%; height: 205px; object-fit: cover; background: linear-gradient(135deg, #cad8c5, #e7ddc5 58%, #abc1b4); }
-.image-upload-preview { display: grid; justify-items: start; gap: .35rem; margin-top: -.35rem; }
-.image-upload-preview img { display: block; width: min(100%, 440px); aspect-ratio: 1.7; border: 1px solid var(--line); border-radius: 10px; object-fit: cover; background: #eef1eb; }
-.image-upload-preview p { margin: 0; }
+.image-url-preview { display: grid; justify-items: start; gap: .35rem; margin-top: -.35rem; }
+.image-url-preview img { display: block; width: min(100%, 440px); aspect-ratio: 1.7; border: 1px solid var(--line); border-radius: 10px; object-fit: cover; background: #eef1eb; }
+.image-url-preview p { margin: 0; }
 .cabin-image-fallback { display: grid; place-items: center; color: rgba(36, 67, 50, .7); font-family: Georgia, serif; font-size: 3.4rem; }
 .cabin-card-content { display: flex; flex: 1; flex-direction: column; padding: 1.1rem; }
 .cabin-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; }

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="940" viewBox="0 0 1440 940" role="img" aria-labelledby="title desc">
   <title id="title">Arquitectura cliente-servidor de Reservas de Cabañas en Chiloé</title>
-  <desc id="desc">Los navegadores cargan las interfaces desde Express. Firebase Authentication emite ID tokens que Express valida. La API aplica reglas y accede a Firestore; las imágenes se guardan en el disco persistente de la VM y se sirven desde Express.</desc>
+  <desc id="desc">Los navegadores cargan las interfaces desde Express. Firebase Authentication emite ID tokens que Express valida. La API aplica reglas y accede a Firestore. Firestore conserva las URLs HTTPS públicas de las imágenes y los navegadores las cargan directamente desde los sitios externos.</desc>
   <defs>
     <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1 L11 6 L1 11 Z" fill="#315b42"/></marker>
     <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1 L11 6 L1 11 Z" fill="#496589"/></marker>
@@ -67,14 +67,14 @@
   <text x="944" y="411" class="body">Firebase Admin SDK</text>
   <text x="944" y="432" class="body">Acceso a Firestore</text>
 
-  <rect x="394" y="500" width="310" height="110" class="node-gold"/>
-  <text x="416" y="532" class="node-title">Sistema de archivos de la VM</text>
-  <text x="416" y="557" class="body">UPLOADS_DIR · imágenes de cabañas</text>
-  <text x="416" y="581" class="small">Express sirve las rutas /uploads/...</text>
+  <rect x="1190" y="590" width="205" height="120" class="node-gold"/>
+  <text x="1211" y="625" class="node-title">Sitio externo</text>
+  <text x="1211" y="652" class="body">URL HTTPS pública</text>
+  <text x="1211" y="677" class="small">Aloja los archivos</text>
 
   <rect x="1190" y="386" width="205" height="152" class="node-blue"/>
   <text x="1211" y="420" class="node-title">Cloud Firestore</text>
-  <text x="1211" y="447" class="body">cabanas</text>
+  <text x="1211" y="447" class="body">cabanas · imagenUrl HTTPS</text>
   <text x="1211" y="470" class="body">reservas</text>
   <text x="1211" y="493" class="body">nochesOcupadas</text>
   <text x="1211" y="518" class="small">Bloqueo por cabaña y fecha</text>
@@ -91,7 +91,7 @@
   <text x="309" y="324" class="edge-label">Acceso al panel</text>
 
   <path d="M306 340 H628 V261 H655" class="edge" marker-start="url(#arrow-green)"/>
-  <text x="430" y="316" class="edge-label">Solicitud API + Bearer token</text>
+  <text x="430" y="316" class="edge-label">Catálogo público · Bearer en reserva, Mis reservas y admin · URL HTTPS</text>
   
   
 
@@ -107,17 +107,15 @@
   
   
 
-  <path d="M765 461 V480 H704 V500" class="edge-gold"/>
-  <text x="780" y="480" class="edge-label">Subida autorizada</text>
-  <path d="M394 555 H332 V285 H285" class="edge-gold"/>
-  <text x="300" y="636" class="edge-label">Imagen pública servida por Express</text>
+  <path d="M285 299 H330 V735 H1165 V650 H1190" class="edge-gold"/>
+  <text x="470" y="729" class="edge-label">La vista previa y el catálogo cargan la imagen desde la URL</text>
 
   <rect x="48" y="770" width="1347" height="125" rx="18" fill="#fffefa" stroke="#d7ddd4"/>
   <text x="72" y="808" class="group-title">Reglas clave del flujo</text>
   <text x="72" y="839" class="body">• La API vuelve a validar fechas, huéspedes y capacidad antes de guardar.</text>
   <text x="72" y="864" class="body">• Una transacción crea la reserva pendiente y bloquea cada noche; rechazar o cancelar libera los bloqueos.</text>
   <text x="790" y="839" class="body">• Firestore bloquea el acceso directo desde el navegador.</text>
-  <text x="790" y="864" class="body">• Para Azure, UPLOADS_DIR debe usar disco persistente con respaldo.</text>
+  <text x="790" y="864" class="body">• Firestore guarda la URL; el archivo permanece alojado externamente.</text>
 </svg>
 
 

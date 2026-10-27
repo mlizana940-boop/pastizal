@@ -140,10 +140,13 @@ function renderCabins(items) {
   items.forEach((cabin) => {
     const card = document.createElement("article");
     card.className = "cabin-card";
-    const hasValidImageUrl = typeof cabin.imagenUrl === "string" && (
-      /^https:\/\//i.test(cabin.imagenUrl)
-      || /^\/uploads\/[A-Za-z0-9_-]{1,150}\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\.(?:jpg|png|webp)$/i.test(cabin.imagenUrl)
-    );
+    let hasValidImageUrl = false;
+    try {
+      const imageUrl = new URL(cabin.imagenUrl);
+      hasValidImageUrl = imageUrl.protocol === "https:" && Boolean(imageUrl.hostname) && !imageUrl.username && !imageUrl.password;
+    } catch {
+      hasValidImageUrl = false;
+    }
     if (hasValidImageUrl) {
       const image = document.createElement("img");
       image.className = "cabin-image";

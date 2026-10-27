@@ -1,5 +1,4 @@
 node_modules/
-storage/uploads/
 .env
 .env.*
 !.env.example

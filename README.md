@@ -20,15 +20,12 @@ src/
   app.js
   server.js
   config/firebaseAdmin.js
-  config/uploadStorage.js
   routes/
   controllers/
   services/
-    cabanaImage.service.js
   models/
   repositories/
   middleware/
-    uploadCabanaImage.js
   utils/
 public/
   admin/
@@ -36,7 +33,6 @@ public/
     reservas.html
     reservas.js
   css/
-storage/uploads/  # archivos cargados localmente, ignorados por Git
 ```
 
 La vista `/` y `/cliente/` permite explorar cabañas sin iniciar sesión. El acceso compartido está en `/cuenta.html`; después de crear la cuenta, la persona inicia sesión para continuar con la solicitud guardada. `/cliente/reservas.html` muestra las reservas asociadas a la cuenta autenticada. Firebase Authentication administra las cuentas; no se mantiene una colección separada de usuarios conectados. Cada reserva guarda el UID de Firebase Authentication en `clienteUid`. El enlace de administración conduce al mismo acceso y el servidor autoriza el panel solo a administradores.
@@ -60,11 +56,11 @@ En Firebase Authentication habilita el proveedor de correo y contraseña y crea 
 
 ### Imágenes de cabañas
 
-El administrador puede seleccionar una imagen JPG, PNG o WebP de hasta 3 MB; el formulario muestra una vista previa y sus dimensiones. Express valida y guarda el archivo en el servidor, y Firestore conserva su ruta pública (`/uploads/...`). En desarrollo se usa `storage/uploads`, que está excluida de Git. En Azure, define `UPLOADS_DIR` con la ruta absoluta de un disco persistente fuera de la carpeta del repositorio; no uses un disco temporal ni una ruta que el proceso de despliegue limpie. La API exige autenticación y permisos de administrador para cargar imágenes.
+El administrador pega una URL HTTPS pública y directa a la imagen (no a una página de galería). El panel carga una vista previa y muestra sus dimensiones; al guardar, Express valida la URL y Firestore almacena el valor en `imagenUrl`. El navegador del cliente carga la imagen directamente desde el sitio que la aloja. El servidor de la aplicación no recibe, almacena ni sirve archivos de imagen, por lo que la URL debe ser accesible sin iniciar sesión y mantenerse disponible. Si una cabaña conserva una ruta antigua `/uploads/...`, reemplázala por una URL pública antes del despliegue.
 
 ## Validaciones de formularios
 
-El registro y el inicio de sesión usan Firebase Authentication: correo válido y contraseña de 6 a 128 caracteres; el registro confirma que ambas contraseñas coincidan. Las reservas validan nombre completo, correo asociado a la sesión, teléfono de 8 a 15 dígitos, fechas futuras y en orden, estadías de hasta 30 noches y huéspedes dentro de la capacidad. La administración valida nombre, precio entero de $1 a $10.000.000 CLP, capacidad de 1 a 30, descripción de hasta 1.000 caracteres, hasta 20 comodidades únicas y los formatos y tamaño de imagen. Las reglas principales se vuelven a validar en el servidor antes de guardar.
+El registro y el inicio de sesión usan Firebase Authentication: correo válido y contraseña de 6 a 128 caracteres; el registro confirma que ambas contraseñas coincidan. Las reservas validan nombre completo, correo asociado a la sesión, teléfono de 8 a 15 dígitos, fechas futuras y en orden, estadías de hasta 30 noches y huéspedes dentro de la capacidad. La administración valida nombre, precio entero de $1 a $10.000.000 CLP, capacidad de 1 a 30, descripción de hasta 1.000 caracteres, hasta 20 comodidades únicas y una URL HTTPS pública válida para la imagen. Las reglas principales se vuelven a validar en el servidor antes de guardar.
 
 Despliega las reglas e índices de Firestore desde el directorio del proyecto después de seleccionar el proyecto Firebase correcto:
 
@@ -109,7 +105,6 @@ Todas requieren un Firebase ID token en `Authorization: Bearer <token>` y una cu
 - `GET /api/admin/cabanas`
 - `POST /api/admin/cabanas`
 - `PUT /api/admin/cabanas/:id`
-- `POST /api/admin/cabanas/:id/imagen`: carga o reemplaza una imagen JPG, PNG o WebP (máximo 3 MB) como administrador.
 - `DELETE /api/admin/cabanas/:id`: elimina la cabaña y sus noches ocupadas; conserva las reservas históricas y responde con conflicto si aún hay reservas pendientes o confirmadas.
 - `GET /api/admin/reservas?estado=pendiente&cursor=<id>`: devuelve en páginas de 20. `estado` y `cursor` son opcionales; la respuesta incluye `nextCursor` y una alerta global si hay solicitudes pendientes de más de 24 horas.
 - `PATCH /api/admin/reservas/:id/estado` con `estado`: `confirmada`, `rechazada` o `cancelada`.

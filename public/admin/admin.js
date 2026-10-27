@@ -6,7 +6,6 @@ const message = document.querySelector("#page-message");
 const cabinsTable = document.querySelector("#cabins-table");
 const reservationsTable = document.querySelector("#reservations-table");
 const cabinForm = document.querySelector("#cabin-form");
-const cabinImageInput = document.querySelector("#cabin-image-file");
 const cabinImageUrlInput = document.querySelector("#cabin-image-url");
 const cabinImagePreview = document.querySelector("#cabin-image-preview");
 const cabinImagePreviewImage = document.querySelector("#cabin-image-preview-img");
@@ -14,11 +13,9 @@ const cabinImageDetails = document.querySelector("#cabin-image-details");
 const cabinNameInput = document.querySelector("#cabin-name");
 const cabinPriceInput = document.querySelector("#cabin-price");
 const cabinAmenitiesInput = document.querySelector("#cabin-amenities");
-const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024;
 const MAX_CABIN_PRICE_CLP = 10_000_000;
 const MAX_AMENITIES = 20;
 const MAX_AMENITY_LENGTH = 40;
-const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 let auth;
 let currentUser = null;
 let cabins = [];
@@ -26,7 +23,6 @@ let reservations = [];
 let reservationPage = 0;
 let reservationCursors = [null];
 let reservationNextCursor = null;
-let previewObjectUrl = null;
 
 function showMessage(text, isError = false) {
   message.textContent = text;
@@ -59,17 +55,16 @@ function cell(row, text) {
 }
 
 function isCabinImageUrl(value) {
-  return typeof value === "string" && (
-    /^https:\/\//i.test(value)
-    || /^\/uploads\/[A-Za-z0-9_-]{1,150}\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\.(?:jpg|png|webp)$/i.test(value)
-  );
+  if (typeof value !== "string" || !value.trim()) return false;
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "https:" && Boolean(url.hostname) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
 }
 
 function clearCabinImagePreview() {
-  if (previewObjectUrl) {
-    URL.revokeObjectURL(previewObjectUrl);
-    previewObjectUrl = null;
-  }
   cabinImagePreviewImage.onload = null;
   cabinImagePreviewImage.onerror = null;
   cabinImagePreviewImage.removeAttribute("src");
@@ -90,36 +85,22 @@ function showCabinImagePreview(source, description = "") {
   cabinImagePreviewImage.src = source;
 }
 
-function showCurrentCabinImage() {
-  clearCabinImagePreview();
-  if (isCabinImageUrl(cabinImageUrlInput.value)) {
-    showCabinImagePreview(cabinImageUrlInput.value, "Imagen actual");
-  }
+function validateCabinImageUrl() {
+  const value = cabinImageUrlInput.value.trim();
+  const valid = !value || (value.length <= 2048 && isCabinImageUrl(value));
+  cabinImageUrlInput.setCustomValidity(valid ? "" : "Ingresa una URL HTTPS pública válida para la imagen.");
+  return valid;
 }
 
-function handleCabinImageSelection() {
-  const file = cabinImageInput.files?.[0];
-  if (!file) {
-    showCurrentCabinImage();
+function updateCabinImagePreview() {
+  const value = cabinImageUrlInput.value.trim();
+  const valid = validateCabinImageUrl();
+  if (!value || !valid) {
+    clearCabinImagePreview();
     return;
   }
-  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
-    cabinImageInput.value = "";
-    showCurrentCabinImage();
-    showMessage("Selecciona una imagen JPG, PNG o WebP.", true);
-    return;
-  }
-  if (file.size > MAX_IMAGE_SIZE_BYTES) {
-    cabinImageInput.value = "";
-    showCurrentCabinImage();
-    showMessage("La imagen no puede superar los 3 MB.", true);
-    return;
-  }
-
   clearCabinImagePreview();
-  previewObjectUrl = URL.createObjectURL(file);
-  showCabinImagePreview(previewObjectUrl, `Imagen seleccionada · ${(file.size / 1024).toFixed(0)} KB`);
-  showMessage("");
+  showCabinImagePreview(value, "Vista previa desde URL pública");
 }
 
 function validateCabinName() {
@@ -284,6 +265,7 @@ function resetCabinForm() {
   cabinNameInput.setCustomValidity("");
   cabinPriceInput.setCustomValidity("");
   cabinAmenitiesInput.setCustomValidity("");
+  cabinImageUrlInput.setCustomValidity("");
   document.querySelector("#cabin-id").value = "";
   cabinImageUrlInput.value = "";
   document.querySelector("#save-cabin").textContent = "Guardar cabaña";
@@ -295,42 +277,24 @@ cabinForm.addEventListener("submit", async (event) => {
   validateCabinName();
   validateCabinPrice();
   validateCabinAmenities();
+  validateCabinImageUrl();
   if (!cabinForm.reportValidity()) return;
   const id = document.querySelector("#cabin-id").value;
-  const imageFile = cabinImageInput.files?.[0] || null;
   const saveButton = document.querySelector("#save-cabin");
   const data = {
     nombre: document.querySelector("#cabin-name").value,
     precioPorNoche: Number(document.querySelector("#cabin-price").value),
     capacidad: Number(document.querySelector("#cabin-capacity").value),
     descripcion: document.querySelector("#cabin-description").value,
-    imagenUrl: cabinImageUrlInput.value,
+    imagenUrl: cabinImageUrlInput.value.trim(),
     comodidades: document.querySelector("#cabin-amenities").value.split(",").map((item) => item.trim()).filter(Boolean)
   };
   saveButton.disabled = true;
   try {
-    const savedCabin = await api(id ? `cabanas/${encodeURIComponent(id)}` : "cabanas", {
+    await api(id ? `cabanas/${encodeURIComponent(id)}` : "cabanas", {
       method: id ? "PUT" : "POST",
       body: JSON.stringify(data)
     });
-    const savedCabinId = savedCabin.data?.id || id;
-
-    if (imageFile) {
-      const formData = new FormData();
-      formData.append("imagen", imageFile);
-      try {
-        await api(`cabanas/${encodeURIComponent(savedCabinId)}/imagen`, {
-          method: "POST",
-          body: formData
-        });
-      } catch (uploadError) {
-        document.querySelector("#cabin-id").value = savedCabinId;
-        document.querySelector("#save-cabin").textContent = "Reintentar guardado";
-        await loadData();
-        showMessage(`La cabaña se guardó, pero no se pudo subir la imagen: ${uploadError.message} Puedes volver a guardar para reintentar sin crear otra cabaña.`, true);
-        return;
-      }
-    }
 
     resetCabinForm();
     showMessage(id ? "Cabaña actualizada." : "Cabaña creada.");
@@ -342,7 +306,7 @@ cabinForm.addEventListener("submit", async (event) => {
   }
 });
 
-cabinImageInput.addEventListener("change", handleCabinImageSelection);
+cabinImageUrlInput.addEventListener("change", updateCabinImagePreview);
 cabinNameInput.addEventListener("input", validateCabinName);
 cabinPriceInput.addEventListener("input", validateCabinPrice);
 cabinAmenitiesInput.addEventListener("input", validateCabinAmenities);
@@ -367,7 +331,7 @@ cabinsTable.addEventListener("click", async (event) => {
     validateCabinAmenities();
     document.querySelector("#save-cabin").textContent = "Guardar cambios";
     document.querySelector("#cancel-edit").hidden = false;
-    showCurrentCabinImage();
+    updateCabinImagePreview();
     document.querySelector("#cabin-name").focus();
   }
   const cabin = cabins.find((item) => item.id === deleteId);
