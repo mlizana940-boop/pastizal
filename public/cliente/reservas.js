@@ -5,6 +5,7 @@ import { firebaseConfig, firebaseConfigReady } from "/admin/firebase-config.js";
 const message = document.querySelector("#reservations-message");
 const reservationsList = document.querySelector("#reservations-list");
 const loadMoreButton = document.querySelector("#load-more-reservations");
+const adminPanelLink = document.querySelector("#admin-panel-link");
 const statusLabels = {
   pendiente: "Pendiente de revisión",
   confirmada: "Confirmada",
@@ -58,13 +59,29 @@ function renderReservation(reservation) {
   details.append(
     detail("Entrada", formatDate(`${reservation.fechaEntrada}T12:00:00`)),
     detail("Salida", formatDate(`${reservation.fechaSalida}T12:00:00`)),
+    detail("Correo de la reserva", reservation.cliente?.email),
+    detail("Teléfono de contacto", reservation.cliente?.telefono),
     detail("Huéspedes", String(reservation.huespedes ?? "—")),
     detail("Noches", String(reservation.cantidadNoches ?? "—")),
+    detail("Precio por noche", `$${Number(reservation.precioPorNoche || 0).toLocaleString("es-CL")} CLP`),
     detail("Total estimado", `$${Number(reservation.totalEstimado || 0).toLocaleString("es-CL")} CLP`),
     detail("Solicitud enviada", formatDate(reservation.createdAt, true))
   );
   card.append(heading, details);
   return card;
+}
+
+async function revealAdminPanelLink(user) {
+  adminPanelLink.hidden = true;
+  try {
+    const token = await user.getIdToken();
+    const response = await fetch("/api/admin/session", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    adminPanelLink.hidden = !response.ok;
+  } catch {
+    adminPanelLink.hidden = true;
+  }
 }
 
 async function loadReservations() {
@@ -120,6 +137,7 @@ if (!firebaseConfigReady) {
       window.location.replace("/cuenta.html?next=%2Fcliente%2Freservas.html");
       return;
     }
+    void revealAdminPanelLink(user);
     void loadReservations();
   });
 }

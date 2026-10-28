@@ -14,6 +14,8 @@
     </div>
     <div class="header-actions">
       <span id="admin-email" class="muted"></span>
+      <a class="button button-secondary" href="#cabins-section">Administrar cabañas</a>
+      <a class="button button-secondary" href="/cliente/reservas.html">Mis reservas</a>
       <a class="button button-secondary" href="/cliente/">Ver cabañas</a>
       <button id="logout-button" class="button button-secondary" type="button">Cerrar sesión</button>
     </div>
@@ -27,7 +29,7 @@
       <article class="summary-card"><span>En esta página</span><strong id="reservation-count">—</strong></article>
     </section>
 
-    <section class="panel" aria-labelledby="cabins-title">
+    <section id="cabins-section" class="panel" aria-labelledby="cabins-title">
       <div class="panel-heading">
         <div><p class="eyebrow">Alojamiento</p><h2 id="cabins-title">Cabañas</h2></div>
       </div>
@@ -69,9 +71,10 @@
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="reservations-title">
+    <section id="reservation-management-section" class="panel" aria-labelledby="reservations-title">
       <div class="panel-heading panel-heading-wrap">
         <div><p class="eyebrow">Solicitudes</p><h2 id="reservations-title">Reservas</h2></div>
+        <a class="button button-secondary" href="#cabins-section">Volver a Cabañas</a>
         <label class="filter-label">Filtrar estado
           <select id="reservation-filter">
             <option value="">Todas</option>
