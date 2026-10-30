@@ -90,7 +90,7 @@ Abre `http://localhost:3000`. La API responde en el mismo origen; `GET /api/heal
 
 La solicitud valida que las fechas sean válidas y que la entrada no sea anterior al día actual de Chile, además del contacto, capacidad y disponibilidad. Las noches se bloquean junto con la reserva en una transacción. Las reservas pendientes bloquean fechas hasta que administración las confirme, rechace o cancele. Las solicitudes pendientes de más de 24 horas generan una alerta en el panel; el sistema no las cancela automáticamente. Al eliminar una cabaña se borran sus datos y noches ocupadas, pero se conservan las reservas históricas, que guardan una copia del nombre y precio. Para proteger reservas vigentes, no se permite eliminar una cabaña con solicitudes pendientes o confirmadas.
 
-El archivo `firestore.rules` deniega acceso directo desde clientes web. La API usa Firebase Admin SDK, que opera con credenciales de servidor; por eso la autorización de administrador se verifica en Express. Las consultas paginadas y alertas usan índices compuestos declarados en `firestore.indexes.json`; despliega las reglas y los índices antes de publicar esta versión.
+El archivo `config/firestore/firestore.rules` deniega acceso directo desde clientes web. La API usa Firebase Admin SDK, que opera con credenciales de servidor; por eso la autorización de administrador se verifica en Express. Las consultas paginadas y alertas usan índices compuestos declarados en `config/firestore/firestore.indexes.json`; despliega las reglas y los índices antes de publicar esta versión.
 
 ## API
 
